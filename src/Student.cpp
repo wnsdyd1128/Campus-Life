@@ -3,34 +3,59 @@
 #include <iostream>
 
 Student::Student()
-    : name{ "Noname" }, money{ 50000 }, energy{ 100 } {
+    : name{ "Noname" },
+      money{ 50000 },
+      energy{ 100 },
+      courses{
+          Course{ "Object-Oriented Programming 2" },
+          Course{ "Data Structure" },
+          Course{ "Computer Architecture" }
+      } {
 }
 
 Student::Student(const std::string& name, int money, int energy)
-    : name{ name }, money{ 50000 }, energy{ 100 } {
-    setMoney(money);
-    setEnergy(energy);
+    : name{ name },
+      money{ 50000 },
+      energy{ 100 },
+      courses{
+          Course{ "Object-Oriented Programming 2" },
+          Course{ "Data Structure" },
+          Course{ "Computer Architecture" }
+      } {
+    setMoney(money).setEnergy(energy);
 }
 
-void Student::setMoney(int value) {
+Student::~Student() = default;
+
+Student& Student::setMoney(int value) {
     if (value >= 0) {
-        money = value;
+        this->money = value;
     }
+    return *this;
 }
 
-void Student::setEnergy(int value) {
+Student& Student::setEnergy(int value) {
     if (value < 0) value = 0;
     if (value > 100) value = 100;
-    energy = value;
+    this->energy = value;
+    return *this;
 }
 
 std::string Student::getName() const { return name; }
 int Student::getMoney() const { return money; }
 int Student::getEnergy() const { return energy; }
+int Student::getCourseCount() { return COURSE_COUNT; }
 
-bool Student::study() {
-    if (energy < 25) return false;
+Course& Student::getCourse(int index) { return courses[index]; }
+const Course& Student::getCourse(int index) const { return courses[index]; }
+
+bool Student::study(int courseIndex) {
+    if (courseIndex < 0 || courseIndex >= COURSE_COUNT || energy < 25) {
+        return false;
+    }
+
     energy -= 25;
+    courses[courseIndex].study();
     return true;
 }
 
@@ -58,4 +83,10 @@ void Student::printStatus() const {
     std::cout << "Name   : " << name << std::endl;
     std::cout << "Money  : " << money << " won" << std::endl;
     std::cout << "Energy : " << energy << " / 100" << std::endl;
+
+    std::cout << "Courses" << std::endl;
+    for (int index = 0; index < COURSE_COUNT; ++index) {
+        std::cout << "  ";
+        courses[index].printInfo();
+    }
 }
