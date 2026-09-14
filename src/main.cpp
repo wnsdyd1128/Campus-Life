@@ -24,7 +24,7 @@ int main() {
 
     if (student.work()) {
         std::cout << "Part-time job" << std::endl;
-    }
+    } 
 
     student.sleep();
     std::cout << "Sleep" << std::endl;
