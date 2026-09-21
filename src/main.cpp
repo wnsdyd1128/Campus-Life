@@ -34,7 +34,7 @@ int main() {
 
     const Student& currentStudent{ student };
     std::cout << std::endl << "Registered courses: "
-              << Student::getCourseCount() << std::endl;
+              << currentStudent.getCourseCount() << std::endl;
     currentStudent.getCourse(0).printInfo();
 
     return 0;

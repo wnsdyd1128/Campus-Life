@@ -2,30 +2,74 @@
 
 #include <iostream>
 
+namespace {
+const std::string DEFAULT_COURSE_NAMES[]{
+    "Object-Oriented Programming 2",
+    "Data Structure",
+    "Computer Architecture"
+};
+}
+
 Student::Student()
-    : name{ "Noname" },
-      money{ 50000 },
-      energy{ 100 },
-      courses{
-          Course{ "Object-Oriented Programming 2" },
-          Course{ "Data Structure" },
-          Course{ "Computer Architecture" }
-      } {
+    : Student{ "Noname", 50000, 100 } {
 }
 
 Student::Student(const std::string& name, int money, int energy)
+    : Student{ name, money, energy,
+               DEFAULT_COURSE_NAMES, DEFAULT_COURSE_COUNT } {
+}
+
+Student::Student(const std::string& name, int money, int energy,
+                 const std::string courseNames[], int courseCount)
     : name{ name },
       money{ 50000 },
       energy{ 100 },
-      courses{
-          Course{ "Object-Oriented Programming 2" },
-          Course{ "Data Structure" },
-          Course{ "Computer Architecture" }
-      } {
+      courseCount{ courseCount > 0 ? courseCount : 0 },
+      courses{ this->courseCount > 0 ? new Course[this->courseCount] : nullptr } {
     setMoney(money).setEnergy(energy);
+
+    for (int index = 0; index < this->courseCount; ++index) {
+        courses[index] = Course{ courseNames[index] };
+    }
 }
 
-Student::~Student() = default;
+Student::~Student() {
+    delete[] courses;
+}
+
+Student::Student(const Student& other)
+    : name{ other.name },
+      money{ other.money },
+      energy{ other.energy },
+      courseCount{ other.courseCount },
+      courses{ courseCount > 0 ? new Course[courseCount] : nullptr } {
+    for (int index = 0; index < courseCount; ++index) {
+        courses[index] = other.courses[index];
+    }
+}
+
+Student& Student::operator=(const Student& other) {
+    if (this == &other) {
+        return *this;
+    }
+
+    Course* copiedCourses =
+        other.courseCount > 0 ? new Course[other.courseCount] : nullptr;
+
+    for (int index = 0; index < other.courseCount; ++index) {
+        copiedCourses[index] = other.courses[index];
+    }
+
+    delete[] courses;
+
+    name = other.name;
+    money = other.money;
+    energy = other.energy;
+    courseCount = other.courseCount;
+    courses = copiedCourses;
+
+    return *this;
+}
 
 Student& Student::setMoney(int value) {
     if (value >= 0) {
@@ -44,13 +88,13 @@ Student& Student::setEnergy(int value) {
 std::string Student::getName() const { return name; }
 int Student::getMoney() const { return money; }
 int Student::getEnergy() const { return energy; }
-int Student::getCourseCount() { return COURSE_COUNT; }
+int Student::getCourseCount() const { return courseCount; }
 
 Course& Student::getCourse(int index) { return courses[index]; }
 const Course& Student::getCourse(int index) const { return courses[index]; }
 
 bool Student::study(int courseIndex) {
-    if (courseIndex < 0 || courseIndex >= COURSE_COUNT || energy < 25) {
+    if (courseIndex < 0 || courseIndex >= courseCount || energy < 25) {
         return false;
     }
 
@@ -85,7 +129,7 @@ void Student::printStatus() const {
     std::cout << "Energy : " << energy << " / 100" << std::endl;
 
     std::cout << "Courses" << std::endl;
-    for (int index = 0; index < COURSE_COUNT; ++index) {
+    for (int index = 0; index < courseCount; ++index) {
         std::cout << "  ";
         courses[index].printInfo();
     }
