@@ -365,3 +365,5 @@ FodyWeavers.xsd
 # Custom gitignore files
 tmp/
 docs/
+.devcontainer/
+Dockerfile
