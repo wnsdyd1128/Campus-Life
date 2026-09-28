@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iosfwd>
 #include <string>
 
 #include "Course.hpp"
@@ -85,3 +86,12 @@ public:
 
     void printStatus() const;
 };
+
+/**
+ * @brief Writes the student's resources and owned courses to a stream.
+ *
+ * @param out     Destination stream.
+ * @param student Student to format.
+ * @return The destination stream.
+ */
+std::ostream& operator<<(std::ostream& out, const Student& student);

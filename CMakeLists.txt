@@ -7,9 +7,11 @@ include(CTest)
 add_executable(CampusLife
     include/Course.hpp
     include/Student.hpp
+    include/WeeklyPlan.hpp
     src/main.cpp
     src/Course.cpp
     src/Student.cpp
+    src/WeeklyPlan.cpp
 )
 
 target_include_directories(CampusLife PRIVATE include)
@@ -29,8 +31,10 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES
     src/main.cpp
     src/Course.cpp
     src/Student.cpp
+    src/WeeklyPlan.cpp
     include/Course.hpp
     include/Student.hpp
+    include/WeeklyPlan.hpp
 )
 
 set_property(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
@@ -67,4 +71,23 @@ if(BUILD_TESTING)
 
     include(GoogleTest)
     gtest_add_tests(TARGET StudentOwnershipTests)
+
+    add_executable(OperatorOverloadingTests
+        tests/OperatorOverloadingTests.cpp
+        src/Course.cpp
+        src/Student.cpp
+        src/WeeklyPlan.cpp
+    )
+
+    target_include_directories(OperatorOverloadingTests PRIVATE include)
+    target_compile_features(OperatorOverloadingTests PRIVATE cxx_std_20)
+    target_link_libraries(OperatorOverloadingTests PRIVATE GTest::gtest_main)
+
+    if(MSVC)
+        target_compile_options(OperatorOverloadingTests PRIVATE /W4 /permissive- /EHsc)
+    else()
+        target_compile_options(OperatorOverloadingTests PRIVATE -Wall -Wextra -Wpedantic)
+    endif()
+
+    gtest_add_tests(TARGET OperatorOverloadingTests)
 endif()

@@ -29,30 +29,39 @@ std::string Course::getName() const { return name; }
 std::string Course::getGrade() const { return grade; }
 int Course::getProgress() const { return progress; }
 
-void Course::study() {
-    if (grade == "A+") {
-        return;
+Course& Course::operator+=(int point) {
+    if (point <= 0 || grade == "A+") {
+        return *this;
     }
 
-    int point = 0;
-    if (grade == "C") point = 40;
-    else if (grade == "B") point = 25;
-    else if (grade == "A") point = 20;
-
     progress += point;
-
     if (progress >= 100) {
         progress = 0;
         if (grade == "C") grade = "B";
         else if (grade == "B") grade = "A";
         else if (grade == "A") grade = "A+";
     }
+
+    return *this;
+}
+
+void Course::study() {
+    int point = 0;
+    if (grade == "C") point = 40;
+    else if (grade == "B") point = 25;
+    else if (grade == "A") point = 20;
+
+    *this += point;
 }
 
 void Course::printInfo() const {
-    std::cout << name << " : " << grade;
-    if (grade != "A+") {
-        std::cout << " [" << progress << "/100]";
+    std::cout << *this << std::endl;
+}
+
+std::ostream& operator<<(std::ostream& out, const Course& course) {
+    out << course.getName() << " : " << course.getGrade();
+    if (course.getGrade() != "A+") {
+        out << " [" << course.getProgress() << "/100]";
     }
-    std::cout << std::endl;
+    return out;
 }

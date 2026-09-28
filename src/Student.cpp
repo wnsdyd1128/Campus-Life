@@ -124,13 +124,18 @@ bool Student::eatChicken() {
 }
 
 void Student::printStatus() const {
-    std::cout << "Name   : " << name << std::endl;
-    std::cout << "Money  : " << money << " won" << std::endl;
-    std::cout << "Energy : " << energy << " / 100" << std::endl;
+    std::cout << *this << std::endl;
+}
 
-    std::cout << "Courses" << std::endl;
-    for (int index = 0; index < courseCount; ++index) {
-        std::cout << "  ";
-        courses[index].printInfo();
+std::ostream& operator<<(std::ostream& out, const Student& student) {
+    out << "Name   : " << student.getName() << '\n';
+    out << "Money  : " << student.getMoney() << " won\n";
+    out << "Energy : " << student.getEnergy() << " / 100\n";
+    out << "Courses";
+
+    for (int index = 0; index < student.getCourseCount(); ++index) {
+        out << "\n  " << student.getCourse(index);
     }
+
+    return out;
 }

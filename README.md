@@ -1,20 +1,21 @@
 # Campus Life
 
 `Campus Life`는 객체지향 프로그래밍 개념을 단계적으로 적용하며 완성하는 C++ 콘솔 프로젝트입니다.
-학생의 돈과 체력, 수강 과목의 성적 및 학습 진척도를 객체로 관리합니다.
+학생의 돈과 체력, 수강 과목의 성적과 학습 진척도, 평일 행동 계획을 객체로 관리합니다.
 
 ## 현재 단계
 
-현재 `week4` 브랜치는 로드맵의 **3단계 - 수강 과목 관리 구조 개선** 중
-강의자료 2–6, 12, 15–16쪽을 제외한 범위를 구현합니다.
+현재 `week5` 브랜치는 로드맵의 **4단계 - 연산자 오버로딩과 주간 계획표**를 구현합니다.
+강의자료 2–3, 12, 23쪽의 내용은 이번 단계에서 제외했습니다.
 
-- `Student`가 여러 `Course` 객체를 동적 배열로 소유
-- `new[]`와 `delete[]`를 이용한 자원 관리
-- 복사 생성자와 복사 대입 연산자의 깊은 복사
-- 복사 자기 대입 시 상태 유지
-- GoogleTest를 이용한 깊은 복사 동작 검증
+- `WeeklyPlan`에 월요일부터 금요일까지 5개의 행동 저장
+- `WeeklyPlan::operator[]`의 읽기/쓰기 오버로드
+- `Course::operator+=`를 통한 학습 점수 누적과 체이닝
+- `Course`와 `Student`의 스트림 출력 연산자 `operator<<`
+- `WeeklyPlan::clear()`를 통한 계획 초기화
+- GoogleTest를 이용한 기존 소유권과 새 연산자 동작 검증
 
-아직 주간 계획표, 행동 클래스, 파일 저장과 같은 이후 단계 기능은 포함하지 않습니다.
+행동 클래스 계층, 계획의 자동 실행, 입력 오류 복구, 파일 저장은 이후 단계에서 다룹니다.
 
 ## 요구 사항
 
@@ -33,12 +34,15 @@ Campus-Life/
 ├── CMakeLists.txt
 ├── include/
 │   ├── Course.hpp
-│   └── Student.hpp
+│   ├── Student.hpp
+│   └── WeeklyPlan.hpp
 ├── src/
 │   ├── Course.cpp
 │   ├── Student.cpp
+│   ├── WeeklyPlan.cpp
 │   └── main.cpp
 └── tests/
+    ├── OperatorOverloadingTests.cpp
     └── StudentOwnershipTests.cpp
 ```
 
@@ -71,12 +75,15 @@ Windows Debug 빌드:
 out/cmake-build/CampusLife
 ```
 
+프로그램은 먼저 5일치 계획을 저장하고 `operator[]`로 다시 읽은 다음, 기존 예시 행동을 실행해
+학생과 과목 상태를 `operator<<`로 출력합니다.
+
 ## 테스트
 
-먼저 Debug 구성으로 테스트 실행 파일을 빌드합니다.
+먼저 Debug 구성으로 모든 실행 파일을 빌드합니다.
 
 ```powershell
-cmake --build out/cmake-build --config Debug --target StudentOwnershipTests
+cmake --build out/cmake-build --config Debug
 ```
 
 CTest로 전체 테스트를 실행합니다.
@@ -92,21 +99,25 @@ GoogleTest 실행 파일을 직접 실행할 수도 있습니다.
 
 ```powershell
 .\out\cmake-build\Debug\StudentOwnershipTests.exe
+.\out\cmake-build\Debug\OperatorOverloadingTests.exe
 ```
 
-현재 테스트는 다음 동작을 검증합니다.
+현재 등록된 테스트 10개는 다음 동작을 검증합니다.
 
-1. 복사 생성자의 깊은 복사
-2. 복사 대입 연산자의 깊은 복사
-3. 복사 자기 대입
-4. 사용자 지정 과목 배열 생성
+1. `Student` 복사 생성자와 복사 대입 연산자의 깊은 복사 및 자기 대입
+2. 사용자 지정 과목 배열 생성
+3. `Course::operator+=`의 반환값과 성적 상승
+4. `Course`와 `Student`의 스트림 출력
+5. `WeeklyPlan::operator[]`의 쓰기 및 `const` 읽기
+6. `WeeklyPlan::clear()`의 5일 계획 초기화
 
 ## 브랜치
 
 | 브랜치 | 단계 | 주요 학습 내용 |
 | --- | --- | --- |
 | `week3` | 2단계 | `Student`와 `Course`의 구성 관계 |
-| `week4` | 3단계 일부 | 동적 메모리, 깊은 복사 (이동 의미론 제외) |
+| `week4` | 3단계 | 동적 메모리와 깊은 복사 (이동 의미론 제외) |
+| `week5` | 4단계 | 연산자 오버로딩과 5일 주간 계획표 |
 
 ## 라이선스
 
