@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+build_dir="out/codex-build"
+
+cmake -S . -B "$build_dir"
+cmake --build "$build_dir" --config Debug
+ctest --test-dir "$build_dir" -C Debug --output-on-failure
+git diff --check
