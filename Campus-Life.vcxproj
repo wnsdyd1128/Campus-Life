@@ -21,11 +21,13 @@
   <ItemGroup>
     <ClInclude Include="include\Course.hpp" />
     <ClInclude Include="include\Student.hpp" />
+    <ClInclude Include="include\WeeklyPlan.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Course.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Student.cpp" />
+    <ClCompile Include="src\WeeklyPlan.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
