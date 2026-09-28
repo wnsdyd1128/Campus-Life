@@ -20,7 +20,7 @@ set_target_properties(CampusLife PROPERTIES
 )
 
 if(MSVC)
-    target_compile_options(CampusLife PRIVATE /W4 /permissive-)
+    target_compile_options(CampusLife PRIVATE /W4 /permissive- /EHsc)
 else()
     target_compile_options(CampusLife PRIVATE -Wall -Wextra -Wpedantic)
 endif()
@@ -60,7 +60,7 @@ if(BUILD_TESTING)
     target_link_libraries(StudentOwnershipTests PRIVATE GTest::gtest_main)
 
     if(MSVC)
-        target_compile_options(StudentOwnershipTests PRIVATE /W4 /permissive-)
+        target_compile_options(StudentOwnershipTests PRIVATE /W4 /permissive- /EHsc)
     else()
         target_compile_options(StudentOwnershipTests PRIVATE -Wall -Wextra -Wpedantic)
     endif()
