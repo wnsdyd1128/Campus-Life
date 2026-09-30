@@ -1,10 +1,19 @@
 #include <iostream>
 
+#include "ChickenActivity.hpp"
+#include "PartTimeJobActivity.hpp"
+#include "SleepActivity.hpp"
 #include "Student.hpp"
+#include "StudyActivity.hpp"
 #include "WeeklyPlan.hpp"
 
 int main() {
     Student student{ "Biryong", 50000, 100 };
+    StudyActivity studyOop{ 0 };
+    StudyActivity studyDataStructure{ 1 };
+    ChickenActivity chicken;
+    PartTimeJobActivity work;
+    SleepActivity sleep;
     WeeklyPlan plan;
     plan[0] = { "Study", 0 };
     plan[1] = { "Study", 1 };
@@ -32,24 +41,24 @@ int main() {
 
     std::cout << std::endl << "===== TODAY'S ACTIONS =====" << std::endl;
 
-    if (student.study(0)) {
-        std::cout << "Study: OOP2" << std::endl;
+    if (studyOop.execute(student)) {
+        std::cout << studyOop.getName() << ": OOP2" << std::endl;
     }
 
-    if (student.study(1)) {
-        std::cout << "Study: Data Structure" << std::endl;
+    if (studyDataStructure.execute(student)) {
+        std::cout << studyDataStructure.getName() << ": Data Structure" << std::endl;
     }
 
-    if (student.eatChicken()) {
-        std::cout << "Eat chicken" << std::endl;
+    if (chicken.execute(student)) {
+        std::cout << chicken.getName() << std::endl;
     }
 
-    if (student.work()) {
-        std::cout << "Part-time job" << std::endl;
+    if (work.execute(student)) {
+        std::cout << work.getName() << std::endl;
     }
 
-    student.sleep();
-    std::cout << "Sleep" << std::endl;
+    sleep.execute(student);
+    std::cout << sleep.getName() << std::endl;
 
     std::cout << std::endl << "===== CAMPUS LIFE : RESULT =====" << std::endl;
     std::cout << student << std::endl;

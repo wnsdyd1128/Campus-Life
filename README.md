@@ -5,17 +5,17 @@
 
 ## 현재 단계
 
-현재 `week5` 브랜치는 로드맵의 **4단계 - 연산자 오버로딩과 주간 계획표**를 구현합니다.
-강의자료 2–3, 12, 23쪽의 내용은 이번 단계에서 제외했습니다.
+현재 `week6` 브랜치는 로드맵의 **5단계 - 대학생의 행동을 클래스화하기**를 구현합니다.
+상속 강의자료 28–31쪽의 내용은 이번 단계에서 제외했습니다.
 
-- `WeeklyPlan`에 월요일부터 금요일까지 5개의 행동 저장
-- `WeeklyPlan::operator[]`의 읽기/쓰기 오버로드
-- `Course::operator+=`를 통한 학습 점수 누적과 체이닝
-- `Course`와 `Student`의 스트림 출력 연산자 `operator<<`
-- `WeeklyPlan::clear()`를 통한 계획 초기화
-- GoogleTest를 이용한 기존 소유권과 새 연산자 동작 검증
+- `Activity` 기본 클래스의 공통 이름과 기본 클래스 생성자 호출
+- `StudyActivity`, `PartTimeJobActivity`, `SleepActivity`, `ChickenActivity`의 `public` 상속
+- 파생 클래스별 `execute()`가 기존 `Student`의 공부·아르바이트·잠자기·치킨 행동 호출
+- GoogleTest로 상속 관계와 행동별 성공·실패 조건 검증
 
-행동 클래스 계층, 계획의 자동 실행, 입력 오류 복구, 파일 저장은 이후 단계에서 다룹니다.
+`StudyActivity` **is-a** `Activity`이고, `Student` **has-a** `Course`라는 두 객체 관계를 비교할 수 있습니다.
+이번 단계는 각 파생 클래스 객체를 직접 호출합니다. `Activity*`, 가상 함수, 계획의 자동 실행은 다음 단계에서 다룹니다.
+기존 `WeeklyPlan`의 문자열 계획 저장 방식은 유지합니다.
 
 ## 요구 사항
 
@@ -33,15 +33,26 @@ GoogleTest v1.18.0은 CMake `FetchContent`로 자동으로 내려받으므로 �
 Campus-Life/
 ├── CMakeLists.txt
 ├── include/
+│   ├── Activity.hpp
+│   ├── ChickenActivity.hpp
 │   ├── Course.hpp
+│   ├── PartTimeJobActivity.hpp
+│   ├── SleepActivity.hpp
 │   ├── Student.hpp
+│   ├── StudyActivity.hpp
 │   └── WeeklyPlan.hpp
 ├── src/
+│   ├── Activity.cpp
+│   ├── ChickenActivity.cpp
 │   ├── Course.cpp
+│   ├── PartTimeJobActivity.cpp
+│   ├── SleepActivity.cpp
 │   ├── Student.cpp
+│   ├── StudyActivity.cpp
 │   ├── WeeklyPlan.cpp
 │   └── main.cpp
 └── tests/
+    ├── ActivityInheritanceTests.cpp
     ├── OperatorOverloadingTests.cpp
     └── StudentOwnershipTests.cpp
 ```
@@ -75,8 +86,8 @@ Windows Debug 빌드:
 out/cmake-build/CampusLife
 ```
 
-프로그램은 먼저 5일치 계획을 저장하고 `operator[]`로 다시 읽은 다음, 기존 예시 행동을 실행해
-학생과 과목 상태를 `operator<<`로 출력합니다.
+프로그램은 먼저 5일치 계획을 저장하고 `operator[]`로 다시 읽은 다음, 네 파생 행동 클래스의
+객체를 직접 실행해 학생과 과목 상태를 `operator<<`로 출력합니다.
 
 ## 테스트
 
@@ -100,9 +111,10 @@ GoogleTest 실행 파일을 직접 실행할 수도 있습니다.
 ```powershell
 .\out\cmake-build\Debug\StudentOwnershipTests.exe
 .\out\cmake-build\Debug\OperatorOverloadingTests.exe
+.\out\cmake-build\Debug\ActivityInheritanceTests.exe
 ```
 
-현재 등록된 테스트 10개는 다음 동작을 검증합니다.
+현재 등록된 테스트 16개는 다음 동작을 검증합니다.
 
 1. `Student` 복사 생성자와 복사 대입 연산자의 깊은 복사 및 자기 대입
 2. 사용자 지정 과목 배열 생성
@@ -110,6 +122,7 @@ GoogleTest 실행 파일을 직접 실행할 수도 있습니다.
 4. `Course`와 `Student`의 스트림 출력
 5. `WeeklyPlan::operator[]`의 쓰기 및 `const` 읽기
 6. `WeeklyPlan::clear()`의 5일 계획 초기화
+7. 네 행동 클래스의 상속 관계, 공통 이름, 행동별 자원 변화와 실패 시 상태 유지
 
 ## 브랜치
 
@@ -118,6 +131,7 @@ GoogleTest 실행 파일을 직접 실행할 수도 있습니다.
 | `week3` | 2단계 | `Student`와 `Course`의 구성 관계 |
 | `week4` | 3단계 | 동적 메모리와 깊은 복사 (이동 의미론 제외) |
 | `week5` | 4단계 | 연산자 오버로딩과 5일 주간 계획표 |
+| `week6` | 5단계 | `Activity` 상속 계층과 네 행동 클래스 |
 
 ## 라이선스
 

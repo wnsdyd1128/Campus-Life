@@ -19,14 +19,24 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Activity.hpp" />
+    <ClInclude Include="include\ChickenActivity.hpp" />
     <ClInclude Include="include\Course.hpp" />
+    <ClInclude Include="include\PartTimeJobActivity.hpp" />
+    <ClInclude Include="include\SleepActivity.hpp" />
     <ClInclude Include="include\Student.hpp" />
+    <ClInclude Include="include\StudyActivity.hpp" />
     <ClInclude Include="include\WeeklyPlan.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Activity.cpp" />
+    <ClCompile Include="src\ChickenActivity.cpp" />
     <ClCompile Include="src\Course.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\PartTimeJobActivity.cpp" />
+    <ClCompile Include="src\SleepActivity.cpp" />
     <ClCompile Include="src\Student.cpp" />
+    <ClCompile Include="src\StudyActivity.cpp" />
     <ClCompile Include="src\WeeklyPlan.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

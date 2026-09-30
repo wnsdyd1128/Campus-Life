@@ -15,10 +15,25 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Activity.hpp">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ChickenActivity.hpp">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
     <ClInclude Include="include\Course.hpp">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="include\PartTimeJobActivity.hpp">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SleepActivity.hpp">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
     <ClInclude Include="include\Student.hpp">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="include\StudyActivity.hpp">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="include\WeeklyPlan.hpp">
@@ -26,13 +41,28 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Activity.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ChickenActivity.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
     <ClCompile Include="src\Course.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="src\main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="src\PartTimeJobActivity.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SleepActivity.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
     <ClCompile Include="src\Student.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="src\StudyActivity.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="src\WeeklyPlan.cpp">

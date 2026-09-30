@@ -5,12 +5,22 @@ project(CampusLife LANGUAGES CXX)
 include(CTest)
 
 add_executable(CampusLife
+    include/Activity.hpp
+    include/ChickenActivity.hpp
     include/Course.hpp
+    include/PartTimeJobActivity.hpp
+    include/SleepActivity.hpp
     include/Student.hpp
+    include/StudyActivity.hpp
     include/WeeklyPlan.hpp
     src/main.cpp
+    src/Activity.cpp
+    src/ChickenActivity.cpp
     src/Course.cpp
+    src/PartTimeJobActivity.cpp
+    src/SleepActivity.cpp
     src/Student.cpp
+    src/StudyActivity.cpp
     src/WeeklyPlan.cpp
 )
 
@@ -29,11 +39,21 @@ endif()
 
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES
     src/main.cpp
+    src/Activity.cpp
+    src/ChickenActivity.cpp
     src/Course.cpp
+    src/PartTimeJobActivity.cpp
+    src/SleepActivity.cpp
     src/Student.cpp
+    src/StudyActivity.cpp
     src/WeeklyPlan.cpp
+    include/Activity.hpp
+    include/ChickenActivity.hpp
     include/Course.hpp
+    include/PartTimeJobActivity.hpp
+    include/SleepActivity.hpp
     include/Student.hpp
+    include/StudyActivity.hpp
     include/WeeklyPlan.hpp
 )
 
@@ -90,4 +110,27 @@ if(BUILD_TESTING)
     endif()
 
     gtest_add_tests(TARGET OperatorOverloadingTests)
+
+    add_executable(ActivityInheritanceTests
+        tests/ActivityInheritanceTests.cpp
+        src/Activity.cpp
+        src/ChickenActivity.cpp
+        src/Course.cpp
+        src/PartTimeJobActivity.cpp
+        src/SleepActivity.cpp
+        src/Student.cpp
+        src/StudyActivity.cpp
+    )
+
+    target_include_directories(ActivityInheritanceTests PRIVATE include)
+    target_compile_features(ActivityInheritanceTests PRIVATE cxx_std_20)
+    target_link_libraries(ActivityInheritanceTests PRIVATE GTest::gtest_main)
+
+    if(MSVC)
+        target_compile_options(ActivityInheritanceTests PRIVATE /W4 /permissive- /EHsc)
+    else()
+        target_compile_options(ActivityInheritanceTests PRIVATE -Wall -Wextra -Wpedantic)
+    endif()
+
+    gtest_add_tests(TARGET ActivityInheritanceTests)
 endif()
