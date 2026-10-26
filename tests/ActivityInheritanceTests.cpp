@@ -15,7 +15,7 @@ TEST(ActivityInheritanceTest, FourActionsInheritCommonNames) {
     static_assert(std::is_base_of_v<Activity, SleepActivity>);
     static_assert(std::is_base_of_v<Activity, ChickenActivity>);
 
-    EXPECT_EQ(StudyActivity{ 0 }.getName(), "Study");
+    EXPECT_EQ(StudyActivity{}.getName(), "Study");
     EXPECT_EQ(PartTimeJobActivity{}.getName(), "Part-time job");
     EXPECT_EQ(SleepActivity{}.getName(), "Sleep");
     EXPECT_EQ(ChickenActivity{}.getName(), "Eat chicken");
@@ -23,20 +23,19 @@ TEST(ActivityInheritanceTest, FourActionsInheritCommonNames) {
 
 TEST(ActivityInheritanceTest, StudyChangesOnlyTheSelectedCourse) {
     Student student{ "Ara", 50000, 100 };
-    StudyActivity study{ 1 };
+    StudyActivity study;
 
-    ASSERT_TRUE(study.execute(student));
+    ASSERT_TRUE(study.execute(student, false, 1));
 
     EXPECT_EQ(student.getEnergy(), 75);
     EXPECT_EQ(student.getCourse(0).getProgress(), 0);
     EXPECT_EQ(student.getCourse(1).getProgress(), 40);
 }
 
-TEST(ActivityInheritanceTest, StudyFailureLeavesStudentUnchanged) {
+TEST(ActivityInheritanceTest, StudyWithInsufficientEnergyLeavesStudentUnchanged) {
     Student student{ "Ara", 50000, 20 };
 
-    EXPECT_FALSE(StudyActivity{ 0 }.execute(student));
-    EXPECT_FALSE(StudyActivity{ 99 }.execute(student));
+    EXPECT_FALSE(StudyActivity{}.execute(student, false, 0));
     EXPECT_EQ(student.getEnergy(), 20);
     EXPECT_EQ(student.getCourse(0).getProgress(), 0);
 }

@@ -1,13 +1,13 @@
 #pragma once
 
-#include <string>
+class Activity;
 
 /**
  * @brief Stores one day's selected action without executing it.
  */
 struct PlannedAction {
-    /** Selected action label. */
-    std::string action{ "None" };
+    /** Non-owning action pointer; null means no action. The action must outlive execution. */
+    const Activity* activity{ nullptr };
 
     /** Course index for study actions, or -1 when no course is required. */
     int courseIndex{ -1 };

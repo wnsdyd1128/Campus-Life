@@ -6,6 +6,7 @@ include(CTest)
 
 add_executable(CampusLife
     include/Activity.hpp
+    include/CampusLifeGame.hpp
     include/ChickenActivity.hpp
     include/Course.hpp
     include/PartTimeJobActivity.hpp
@@ -14,7 +15,7 @@ add_executable(CampusLife
     include/StudyActivity.hpp
     include/WeeklyPlan.hpp
     src/main.cpp
-    src/Activity.cpp
+    src/CampusLifeGame.cpp
     src/ChickenActivity.cpp
     src/Course.cpp
     src/PartTimeJobActivity.cpp
@@ -39,7 +40,7 @@ endif()
 
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES
     src/main.cpp
-    src/Activity.cpp
+    src/CampusLifeGame.cpp
     src/ChickenActivity.cpp
     src/Course.cpp
     src/PartTimeJobActivity.cpp
@@ -48,6 +49,7 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES
     src/StudyActivity.cpp
     src/WeeklyPlan.cpp
     include/Activity.hpp
+    include/CampusLifeGame.hpp
     include/ChickenActivity.hpp
     include/Course.hpp
     include/PartTimeJobActivity.hpp
@@ -94,8 +96,12 @@ if(BUILD_TESTING)
 
     add_executable(OperatorOverloadingTests
         tests/OperatorOverloadingTests.cpp
+        src/ChickenActivity.cpp
         src/Course.cpp
+        src/PartTimeJobActivity.cpp
+        src/SleepActivity.cpp
         src/Student.cpp
+        src/StudyActivity.cpp
         src/WeeklyPlan.cpp
     )
 
@@ -113,7 +119,6 @@ if(BUILD_TESTING)
 
     add_executable(ActivityInheritanceTests
         tests/ActivityInheritanceTests.cpp
-        src/Activity.cpp
         src/ChickenActivity.cpp
         src/Course.cpp
         src/PartTimeJobActivity.cpp
@@ -133,4 +138,28 @@ if(BUILD_TESTING)
     endif()
 
     gtest_add_tests(TARGET ActivityInheritanceTests)
+
+    add_executable(PolymorphismTests
+        tests/PolymorphismTests.cpp
+        src/CampusLifeGame.cpp
+        src/ChickenActivity.cpp
+        src/Course.cpp
+        src/PartTimeJobActivity.cpp
+        src/SleepActivity.cpp
+        src/Student.cpp
+        src/StudyActivity.cpp
+        src/WeeklyPlan.cpp
+    )
+
+    target_include_directories(PolymorphismTests PRIVATE include)
+    target_compile_features(PolymorphismTests PRIVATE cxx_std_20)
+    target_link_libraries(PolymorphismTests PRIVATE GTest::gtest_main)
+
+    if(MSVC)
+        target_compile_options(PolymorphismTests PRIVATE /W4 /permissive- /EHsc)
+    else()
+        target_compile_options(PolymorphismTests PRIVATE -Wall -Wextra -Wpedantic)
+    endif()
+
+    gtest_add_tests(TARGET PolymorphismTests)
 endif()

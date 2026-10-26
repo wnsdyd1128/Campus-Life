@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Activity.hpp" />
+    <ClInclude Include="include\CampusLifeGame.hpp" />
     <ClInclude Include="include\ChickenActivity.hpp" />
     <ClInclude Include="include\Course.hpp" />
     <ClInclude Include="include\PartTimeJobActivity.hpp" />
@@ -29,7 +30,7 @@
     <ClInclude Include="include\WeeklyPlan.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Activity.cpp" />
+    <ClCompile Include="src\CampusLifeGame.cpp" />
     <ClCompile Include="src\ChickenActivity.cpp" />
     <ClCompile Include="src\Course.cpp" />
     <ClCompile Include="src\main.cpp" />

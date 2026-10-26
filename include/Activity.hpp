@@ -2,25 +2,33 @@
 
 #include <string>
 
+class Student;
+
 /**
- * @brief Holds the name shared by all campus-life actions.
+ * @brief Defines the common interface for concrete campus-life actions.
  */
 class Activity {
 public:
     /**
-     * @brief Creates a named action for a derived class.
-     *
-     * @param name Name displayed for this action.
+     * @brief Allows derived actions to be destroyed through a base pointer.
      */
-    explicit Activity(const std::string& name);
+    virtual ~Activity() = default;
 
     /**
      * @brief Returns the action's display name.
      *
-     * @return Display name supplied to the base constructor.
+     * @return Display name provided by the concrete action.
      */
-    std::string getName() const;
+    virtual std::string getName() const = 0;
 
-private:
-    std::string name;
+    /**
+     * @brief Executes an action without taking ownership of the student.
+     *
+     * @param student Student whose resources or course state may change.
+     * @param burnout Whether study points are halved for the current week.
+     * @param courseIndex Course to study; ignored by other actions.
+     * @return True on success; false leaves the student's state unchanged.
+     */
+    virtual bool execute(Student& student, bool burnout = false,
+                         int courseIndex = -1) const = 0;
 };

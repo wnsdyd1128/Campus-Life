@@ -18,6 +18,9 @@
     <ClInclude Include="include\Activity.hpp">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="include\CampusLifeGame.hpp">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
     <ClInclude Include="include\ChickenActivity.hpp">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -41,7 +44,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Activity.cpp">
+    <ClCompile Include="src\CampusLifeGame.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="src\ChickenActivity.cpp">

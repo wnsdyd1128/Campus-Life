@@ -2,11 +2,11 @@
 
 #include "Student.hpp"
 
-SleepActivity::SleepActivity()
-    : Activity{ "Sleep" } {
+std::string SleepActivity::getName() const {
+    return "Sleep";
 }
 
-bool SleepActivity::execute(Student& student) const {
+bool SleepActivity::execute(Student& student, bool, int) const {
     student.sleep();
     return true;
 }

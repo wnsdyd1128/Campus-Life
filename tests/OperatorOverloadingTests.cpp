@@ -3,8 +3,12 @@
 
 #include <gtest/gtest.h>
 
+#include "ChickenActivity.hpp"
 #include "Course.hpp"
+#include "PartTimeJobActivity.hpp"
+#include "SleepActivity.hpp"
 #include "Student.hpp"
+#include "StudyActivity.hpp"
 #include "WeeklyPlan.hpp"
 
 TEST(CourseOperatorTest, PlusEqualsReturnsCourseForChaining) {
@@ -48,32 +52,38 @@ TEST(StreamOperatorTest, StudentOutputContainsResourcesAndCourses) {
 }
 
 TEST(WeeklyPlanOperatorTest, SubscriptStoresAndReadsFiveActions) {
+    StudyActivity study;
+    PartTimeJobActivity work;
+    SleepActivity sleep;
+    ChickenActivity chicken;
     WeeklyPlan plan;
-    plan[0] = { "Study", 0 };
-    plan[1] = { "Work", -1 };
-    plan[2] = { "Sleep", -1 };
-    plan[3] = { "Chicken", -1 };
-    plan[4] = { "Study", 2 };
+    plan[0] = { &study, 0 };
+    plan[1] = { &work, -1 };
+    plan[2] = { &sleep, -1 };
+    plan[3] = { &chicken, -1 };
+    plan[4] = { &study, 2 };
     const WeeklyPlan& savedPlan{ plan };
 
-    EXPECT_EQ(savedPlan[0].action, "Study");
+    EXPECT_EQ(savedPlan[0].activity, &study);
     EXPECT_EQ(savedPlan[0].courseIndex, 0);
-    EXPECT_EQ(savedPlan[1].action, "Work");
-    EXPECT_EQ(savedPlan[2].action, "Sleep");
-    EXPECT_EQ(savedPlan[3].action, "Chicken");
+    EXPECT_EQ(savedPlan[1].activity, &work);
+    EXPECT_EQ(savedPlan[2].activity, &sleep);
+    EXPECT_EQ(savedPlan[3].activity, &chicken);
+    EXPECT_EQ(savedPlan[4].activity, &study);
     EXPECT_EQ(savedPlan[4].courseIndex, 2);
 }
 
 TEST(WeeklyPlanOperatorTest, ClearResetsEveryDay) {
+    StudyActivity study;
     WeeklyPlan plan;
     for (int day = 0; day < WeeklyPlan::DAY_COUNT; ++day) {
-        plan[day] = { "Study", day % 3 };
+        plan[day] = { &study, day % 3 };
     }
 
     plan.clear();
 
     for (int day = 0; day < WeeklyPlan::DAY_COUNT; ++day) {
-        EXPECT_EQ(plan[day].action, "None");
+        EXPECT_EQ(plan[day].activity, nullptr);
         EXPECT_EQ(plan[day].courseIndex, -1);
     }
 }

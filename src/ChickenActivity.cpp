@@ -2,10 +2,10 @@
 
 #include "Student.hpp"
 
-ChickenActivity::ChickenActivity()
-    : Activity{ "Eat chicken" } {
+std::string ChickenActivity::getName() const {
+    return "Eat chicken";
 }
 
-bool ChickenActivity::execute(Student& student) const {
+bool ChickenActivity::execute(Student& student, bool, int) const {
     return student.eatChicken();
 }

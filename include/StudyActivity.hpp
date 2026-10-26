@@ -5,25 +5,25 @@
 class Student;
 
 /**
- * @brief Studies one selected course owned by a student.
+ * @brief Studies the course selected in the daily plan.
  */
 class StudyActivity : public Activity {
 public:
     /**
-     * @brief Selects the course to study when this action executes.
+     * @brief Supplies the study action's display name.
      *
-     * @param courseIndex Zero-based index in the student's course list.
+     * @return The study action label.
      */
-    explicit StudyActivity(int courseIndex);
+    std::string getName() const override;
 
     /**
      * @brief Applies one study session to the selected course.
      *
      * @param student Student whose energy and course are changed.
+     * @param burnout Whether to apply half study points using integer division.
+     * @param courseIndex Zero-based index in the student's course list.
      * @return True on success; false for an invalid course or insufficient energy.
      */
-    bool execute(Student& student) const;
-
-private:
-    int courseIndex;
+    bool execute(Student& student, bool burnout = false,
+                 int courseIndex = -1) const override;
 };

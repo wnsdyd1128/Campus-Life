@@ -2,10 +2,10 @@
 
 #include "Student.hpp"
 
-StudyActivity::StudyActivity(int courseIndex)
-    : Activity{ "Study" }, courseIndex{ courseIndex } {
+std::string StudyActivity::getName() const {
+    return "Study";
 }
 
-bool StudyActivity::execute(Student& student) const {
-    return student.study(courseIndex);
+bool StudyActivity::execute(Student& student, bool burnout, int courseIndex) const {
+    return student.study(courseIndex, burnout);
 }

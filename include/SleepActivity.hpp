@@ -10,15 +10,20 @@ class Student;
 class SleepActivity : public Activity {
 public:
     /**
-     * @brief Creates the sleep action with its display name.
+     * @brief Supplies the sleep action's display name.
+     *
+     * @return The sleep action label.
      */
-    SleepActivity();
+    std::string getName() const override;
 
     /**
      * @brief Restores energy up to the student's maximum.
      *
      * @param student Student whose energy is restored.
+     * @param burnout Unused by this action.
+     * @param courseIndex Unused by this action.
      * @return Always true.
      */
-    bool execute(Student& student) const;
+    bool execute(Student& student, bool burnout = false,
+                 int courseIndex = -1) const override;
 };
