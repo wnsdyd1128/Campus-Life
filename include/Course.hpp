@@ -32,7 +32,12 @@ public:
      */
     Course& operator+=(int point);
 
-    void study();
+    /**
+     * @brief Applies the grade's study points, halved during a burnout week.
+     *
+     * @param burnout Whether to halve points using integer division.
+     */
+    void study(bool burnout = false);
     void printInfo() const;
 };
 

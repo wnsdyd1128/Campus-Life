@@ -79,7 +79,15 @@ public:
     Course& getCourse(int index);
     const Course& getCourse(int index) const;
 
-    bool study(int courseIndex);
+    /**
+     * @brief Spends 25 energy to study one owned course.
+     *
+     * @param courseIndex Zero-based course index.
+     * @param burnout Whether this week's study points are halved.
+     * @return True on success; false leaves state unchanged for an invalid index
+     *         or insufficient energy.
+     */
+    bool study(int courseIndex, bool burnout = false);
     bool work();
     void sleep();
     bool eatChicken();

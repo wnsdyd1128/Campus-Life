@@ -93,13 +93,13 @@ int Student::getCourseCount() const { return courseCount; }
 Course& Student::getCourse(int index) { return courses[index]; }
 const Course& Student::getCourse(int index) const { return courses[index]; }
 
-bool Student::study(int courseIndex) {
+bool Student::study(int courseIndex, bool burnout) {
     if (courseIndex < 0 || courseIndex >= courseCount || energy < 25) {
         return false;
     }
 
     energy -= 25;
-    courses[courseIndex].study();
+    courses[courseIndex].study(burnout);
     return true;
 }
 

@@ -45,13 +45,13 @@ Course& Course::operator+=(int point) {
     return *this;
 }
 
-void Course::study() {
+void Course::study(bool burnout) {
     int point = 0;
     if (grade == "C") point = 40;
     else if (grade == "B") point = 25;
     else if (grade == "A") point = 20;
 
-    *this += point;
+    *this += burnout ? point / 2 : point;
 }
 
 void Course::printInfo() const {
