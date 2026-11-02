@@ -5,22 +5,19 @@
 
 ## 현재 단계
 
-현재 `week09` 브랜치는 로드맵의 **06·07단계 - 다형성 기반 주간 실행과 행동 시스템 완성**을 통합합니다.
-7주차 `7. chap12_polymorphism1.pdf`와 9주차 `9. chap12_polymorphism2.pdf`를 기준으로 하며,
-두 번째 강의자료의 15–17쪽 내용은 제외했습니다.
+현재 `week10` 브랜치는 로드맵의 **08단계 - 플레이 가능한 콘솔 UI**를 구현합니다.
+Stream I/O 강의자료의 17–34쪽은 제외했습니다.
 
-- `Activity::getName()`과 `execute()`를 순수 가상 함수로 선언하고 가상 소멸자 제공
-- 네 구체 행동 클래스가 공통 인터페이스를 `override`
-- `WeeklyPlan`이 `const Activity*`와 공부 대상 과목 인덱스를 저장
-- `CampusLifeGame::simulateWeek()`가 공통 인터페이스로 월~금 계획을 순서대로 실행
-- 실패한 행동은 상태를 바꾸지 않고 그날을 소비하며 다음 날 실행을 계속 진행
-- 주말 체력 +35와 체력 상한 100 적용
-- 성공한 행동으로 체력이 0이 되면 다음 주 Burnout 예약, 해당 주 공부 점수는 절반 적용
+- 타이틀에서 새 게임을 시작하고 주 상태와 월~금 계획을 입력
+- 5일 계획을 요약하고 Y/N으로 확인하며, N이면 처음부터 다시 입력
+- 숫자·범위 오류나 확인 입력 오류를 안내하고 다시 입력; EOF에서는 정상 종료
+- 행동별 체력·돈·과목의 실행 전후 상태와 실패 원인 표시
+- 주말 회복과 Burnout, 장학금 달성 또는 16주 종료 결과 표시
 
 `StudyActivity` **is-a** `Activity`이고, `Student` **has-a** `Course`라는 두 객체 관계를 비교할 수 있습니다.
 `Activity` 자체는 객체를 생성할 수 없는 추상 클래스입니다. `StudyActivity` 등의 객체 주소를
 기본 클래스 포인터로 저장하는 upcasting과 가상 함수 호출로 실제 객체의 동작을 선택합니다.
-16주 전체 게임 루프, 콘솔 입력 UI, 파일 저장은 이후 단계에서 다룹니다.
+새 게임은 총 16주를 진행하며, 저장·불러오기와 로그 파일은 이후 단계에서 다룹니다.
 
 ## 행동 객체와 계획의 수명
 
@@ -34,8 +31,9 @@
 `execute(Student&, bool burnout, int courseIndex)`의 `const`는 행동 객체를 변경하지 않는다는 뜻이며,
 전달받은 학생의 자원과 과목은 변경할 수 있습니다.
 
-`simulateWeek()`는 요일별 성공 여부를 `WeekResult`로 반환합니다. 미선택 요일(`nullptr`)은 건너뛰며
-반환값은 `false`입니다. 계획은 실행 후에도 유지되어 다음 주에 재사용하거나 요일별로 덮어쓸 수 있습니다.
+`simulateWeek()`는 요일별 성공 여부와 자원·과목의 실행 전후 상태, 주말 회복량을 `WeekResult`로 반환합니다.
+미선택 요일(`nullptr`)은 건너뛰며 반환값은 `false`입니다. 콘솔 UI는 임시로 선택한 계획을 저장해 두었다가
+확인된 이후에만 게임 계획을 갱신합니다. 실행된 계획은 다음 주에 새로운 선택으로 덮어씁니다.
 Burnout은 다음 실행 주에만 적용되고, 그 주에도 체력이 0이 되면 다시 예약됩니다. 회복으로 예약이 취소되거나
 공부 배율이 1/4로 중첩되지 않습니다. C/B/A의 공부 점수는 Burnout 동안 각각 20/12/10입니다.
 
@@ -57,6 +55,7 @@ Campus-Life/
 ├── include/
 │   ├── Activity.hpp
 │   ├── CampusLifeGame.hpp
+│   ├── ConsoleUI.hpp
 │   ├── ChickenActivity.hpp
 │   ├── Course.hpp
 │   ├── PartTimeJobActivity.hpp
@@ -66,6 +65,7 @@ Campus-Life/
 │   └── WeeklyPlan.hpp
 ├── src/
 │   ├── CampusLifeGame.cpp
+│   ├── ConsoleUI.cpp
 │   ├── ChickenActivity.cpp
 │   ├── Course.cpp
 │   ├── PartTimeJobActivity.cpp
@@ -76,6 +76,7 @@ Campus-Life/
 │   └── main.cpp
 └── tests/
     ├── ActivityInheritanceTests.cpp
+    ├── ConsoleUITests.cpp
     ├── OperatorOverloadingTests.cpp
     ├── PolymorphismTests.cpp
     └── StudentOwnershipTests.cpp
@@ -110,9 +111,10 @@ Windows Debug 빌드:
 out/cmake-build/CampusLife
 ```
 
-프로그램은 공부(0번 과목) → 공부(1번 과목) → 치킨 → 아르바이트 → 잠자기의 5일 계획을 먼저 저장한 뒤
-주간 실행기를 호출합니다. 주말 회복까지 적용한 예시 결과는 Money 65,000, Energy 85,
-두 과목의 학습 진척도 각각 40입니다. 요일별 성공 여부와 이번 주·다음 주 Burnout 상태도 출력합니다.
+메인 메뉴에서 `1`을 입력해 새 게임을 시작합니다. 각 요일에 `1` 공부, `2` 아르바이트,
+`3` 잠자기, `4` 치킨 먹기를 선택하고, 공부에는 과목 번호를 추가로 입력합니다.
+계획을 확인할 때 `Y`를 입력하면 실행하고 `N`을 입력하면 월요일부터 다시 선택합니다.
+계획 입력 중 `0`을 입력하면 메인 메뉴로 돌아갑니다. 메뉴와 결과 문구는 영어로 출력됩니다.
 
 ## 테스트
 
@@ -138,9 +140,10 @@ GoogleTest 실행 파일을 직접 실행할 수도 있습니다.
 .\out\cmake-build\Debug\OperatorOverloadingTests.exe
 .\out\cmake-build\Debug\ActivityInheritanceTests.exe
 .\out\cmake-build\Debug\PolymorphismTests.exe
+.\out\cmake-build\Debug\ConsoleUITests.exe
 ```
 
-현재 등록된 테스트 31개는 다음 동작을 검증합니다.
+기존 테스트와 콘솔 UI 테스트는 다음 동작을 검증합니다.
 
 1. `Student` 복사 생성자와 복사 대입 연산자의 깊은 복사 및 자기 대입
 2. 사용자 지정 과목 배열 생성
@@ -153,6 +156,7 @@ GoogleTest 실행 파일을 직접 실행할 수도 있습니다.
 9. 같은 공부 객체를 공유하는 계획과 월~금 실행 순서, 실패 후 계속 실행
 10. 주말 회복 상한, Burnout 예약·해제·재예약과 정수 나눗셈에 의한 학습량
 11. 모든 과목이 A+가 되어도 남은 요일과 주말 처리를 끝까지 수행
+12. 잘못된 입력·EOF·계획 재입력, 일별 출력과 16주 종료·장학금 화면
 
 ## 브랜치
 
@@ -163,6 +167,7 @@ GoogleTest 실행 파일을 직접 실행할 수도 있습니다.
 | `week5` | 4단계 | 연산자 오버로딩과 5일 주간 계획표 |
 | `week6` | 5단계 | `Activity` 상속 계층과 네 행동 클래스 |
 | `week09` | 06·07단계 통합 | 추상 클래스, 가상 함수와 다형적 주간 실행 |
+| `week10` | 08단계 | 콘솔 입력 복구와 주간·학기 게임 흐름 |
 
 ## 라이선스
 

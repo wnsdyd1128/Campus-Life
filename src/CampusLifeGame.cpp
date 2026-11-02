@@ -33,18 +33,39 @@ WeekResult CampusLifeGame::simulateWeek() {
 
     for (int day = 0; day < WeeklyPlan::DAY_COUNT; ++day) {
         const PlannedAction& selected{ plan[day] };
+        DayResult& daily{ result.days[day] };
+        daily.energyBefore = student.getEnergy();
+        daily.moneyBefore = student.getMoney();
+        daily.energyAfter = daily.energyBefore;
+        daily.moneyAfter = daily.moneyBefore;
         if (selected.activity == nullptr) {
             continue;
         }
 
+        daily.hasCourse = selected.courseIndex >= 0 &&
+                          selected.courseIndex < student.getCourseCount();
+        if (daily.hasCourse) {
+            const Course& course{ student.getCourse(selected.courseIndex) };
+            daily.gradeBefore = course.getGrade();
+            daily.progressBefore = course.getProgress();
+        }
         result.succeeded[day] = selected.activity->execute(
             student, currentBurnout, selected.courseIndex);
+        daily.energyAfter = student.getEnergy();
+        daily.moneyAfter = student.getMoney();
+        if (daily.hasCourse) {
+            const Course& course{ student.getCourse(selected.courseIndex) };
+            daily.gradeAfter = course.getGrade();
+            daily.progressAfter = course.getProgress();
+        }
         if (result.succeeded[day] && student.getEnergy() == 0) {
             nextBurnout = true;
         }
     }
 
+    result.weekendEnergyBefore = student.getEnergy();
     student.setEnergy(student.getEnergy() + 35);
+    result.weekendEnergyAfter = student.getEnergy();
     ++week;
     return result;
 }

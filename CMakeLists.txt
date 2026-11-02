@@ -7,6 +7,7 @@ include(CTest)
 add_executable(CampusLife
     include/Activity.hpp
     include/CampusLifeGame.hpp
+    include/ConsoleUI.hpp
     include/ChickenActivity.hpp
     include/Course.hpp
     include/PartTimeJobActivity.hpp
@@ -16,6 +17,7 @@ add_executable(CampusLife
     include/WeeklyPlan.hpp
     src/main.cpp
     src/CampusLifeGame.cpp
+    src/ConsoleUI.cpp
     src/ChickenActivity.cpp
     src/Course.cpp
     src/PartTimeJobActivity.cpp
@@ -41,6 +43,7 @@ endif()
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES
     src/main.cpp
     src/CampusLifeGame.cpp
+    src/ConsoleUI.cpp
     src/ChickenActivity.cpp
     src/Course.cpp
     src/PartTimeJobActivity.cpp
@@ -50,6 +53,7 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES
     src/WeeklyPlan.cpp
     include/Activity.hpp
     include/CampusLifeGame.hpp
+    include/ConsoleUI.hpp
     include/ChickenActivity.hpp
     include/Course.hpp
     include/PartTimeJobActivity.hpp
@@ -162,4 +166,26 @@ if(BUILD_TESTING)
     endif()
 
     gtest_add_tests(TARGET PolymorphismTests)
+
+    add_executable(ConsoleUITests
+        tests/ConsoleUITests.cpp
+        src/CampusLifeGame.cpp
+        src/ConsoleUI.cpp
+        src/ChickenActivity.cpp
+        src/Course.cpp
+        src/PartTimeJobActivity.cpp
+        src/SleepActivity.cpp
+        src/Student.cpp
+        src/StudyActivity.cpp
+        src/WeeklyPlan.cpp
+    )
+    target_include_directories(ConsoleUITests PRIVATE include)
+    target_compile_features(ConsoleUITests PRIVATE cxx_std_20)
+    target_link_libraries(ConsoleUITests PRIVATE GTest::gtest_main)
+    if(MSVC)
+        target_compile_options(ConsoleUITests PRIVATE /W4 /permissive- /EHsc)
+    else()
+        target_compile_options(ConsoleUITests PRIVATE -Wall -Wextra -Wpedantic)
+    endif()
+    gtest_add_tests(TARGET ConsoleUITests)
 endif()

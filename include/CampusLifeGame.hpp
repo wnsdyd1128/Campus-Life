@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "ChickenActivity.hpp"
 #include "PartTimeJobActivity.hpp"
 #include "SleepActivity.hpp"
@@ -7,12 +9,31 @@
 #include "StudyActivity.hpp"
 #include "WeeklyPlan.hpp"
 
+/** @brief Captures visible student state around one day's action. */
+struct DayResult {
+    int energyBefore{};
+    int energyAfter{};
+    int moneyBefore{};
+    int moneyAfter{};
+    bool hasCourse{ false };
+    std::string gradeBefore;
+    std::string gradeAfter;
+    int progressBefore{};
+    int progressAfter{};
+};
+
 /**
- * @brief Records execution success for each weekday of one simulation.
+ * @brief Records weekday outcomes and weekend recovery for one simulation.
  */
 struct WeekResult {
     /** False means the action failed or the day had no selected action. */
     bool succeeded[WeeklyPlan::DAY_COUNT]{};
+    /** State before and after each weekday action. */
+    DayResult days[WeeklyPlan::DAY_COUNT];
+    /** Energy immediately before weekend recovery. */
+    int weekendEnergyBefore{};
+    /** Energy after weekend recovery, capped at 100. */
+    int weekendEnergyAfter{};
 };
 
 /**
