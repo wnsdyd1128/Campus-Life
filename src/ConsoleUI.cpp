@@ -9,6 +9,7 @@
 
 #include "Activity.hpp"
 #include "CampusLifeGame.hpp"
+#include "LogManager.hpp"
 #include "SaveManager.hpp"
 
 namespace {
@@ -151,6 +152,9 @@ void ConsoleUI::play(CampusLifeGame& game) {
         }
         const int week{ game.getWeek() };
         const WeekResult result{ game.simulateWeek() };
+        if (LogManager{ dataDirectory / "play.log" }.append(week, game) != PersistenceResult::Ok) {
+            output << "Warning: could not append weekly log.\n";
+        }
         const WeeklyPlan& plan{ game.getPlan() };
         for (int day = 0; day < WeeklyPlan::DAY_COUNT; ++day) {
             const DayResult& daily{ result.days[day] };

@@ -5,19 +5,31 @@
 
 ## 현재 단계
 
-현재 `week10` 브랜치는 로드맵의 **08단계 - 플레이 가능한 콘솔 UI**를 구현합니다.
-Stream I/O 강의자료의 17–34쪽은 제외했습니다.
+현재 `week11` 브랜치는 로드맵의 **09단계 - 기록과 1차 저장 기능**을 구현합니다.
+이번 주차에는 File Processing 1 강의자료 전체를 참고했습니다.
 
-- 타이틀에서 새 게임을 시작하고 주 상태와 월~금 계획을 입력
-- 5일 계획을 요약하고 Y/N으로 확인하며, N이면 처음부터 다시 입력
-- 숫자·범위 오류나 확인 입력 오류를 안내하고 다시 입력; EOF에서는 정상 종료
-- 행동별 체력·돈·과목의 실행 전후 상태와 실패 원인 표시
-- 주말 회복과 Burnout, 장학금 달성 또는 16주 종료 결과 표시
+- 매주 완료 후 `data/play.log`에 결과를 텍스트로 추가
+- `data/save.txt`에 게임 상태를 순차 텍스트 레코드로 저장하고 최신 기록을 불러오기
+- Week, Money, Energy, 학생 이름, 세 과목의 이름·등급·진척도와 Burnout 상태 복원
+- 파일을 열 수 없거나 저장 기록이 손상된 경우 안내하고 현재 게임 상태 유지
 
 `StudyActivity` **is-a** `Activity`이고, `Student` **has-a** `Course`라는 두 객체 관계를 비교할 수 있습니다.
 `Activity` 자체는 객체를 생성할 수 없는 추상 클래스입니다. `StudyActivity` 등의 객체 주소를
 기본 클래스 포인터로 저장하는 upcasting과 가상 함수 호출로 실제 객체의 동작을 선택합니다.
-새 게임은 총 16주를 진행하며, 저장·불러오기와 로그 파일은 이후 단계에서 다룹니다.
+새 게임은 총 16주를 진행합니다. 세 저장 슬롯과 바이너리 랜덤 접근은 다음 단계에서 다룹니다.
+
+## 저장과 로그
+
+- 주간 행동을 선택하는 화면에서 `5`를 입력하면 현재 주가 시작된 상태를 저장합니다. 입력 중인 미확정
+  요일 계획은 저장하지 않으며, 저장 후 같은 요일의 행동 선택을 계속합니다.
+- 메인 메뉴의 `2`는 마지막으로 저장한 상태를 불러옵니다. 복원 후에는 해당 주의 계획을 다시 입력합니다.
+- 저장 파일에는 기록을 덮어쓰지 않고 이어 붙입니다. 이전 기록도 남으며 불러올 때 전체 기록의 형식과
+  값 범위를 검사한 다음 마지막 기록을 사용합니다.
+- 잘못된 기록이나 쓰다 중단된 마지막 기록이 있으면 불러오기와 추가 저장을 거부합니다. 기존 내용은
+  그대로 남으므로 `data/save.txt`를 따로 보관한 뒤 확인할 수 있습니다.
+- 완료한 주는 주말 회복 이후 `data/play.log`에 한 줄로 기록됩니다. 로그 쓰기에 실패해도 경고 후 게임은 계속됩니다.
+- `data/`는 프로그램을 실행한 현재 작업 디렉터리 기준이며 Git에서 제외됩니다. 저장은 수동이므로
+  게임을 종료하기 전에 필요한 상태를 저장하세요.
 
 ## 행동 객체와 계획의 수명
 
@@ -56,6 +68,9 @@ Campus-Life/
 │   ├── Activity.hpp
 │   ├── CampusLifeGame.hpp
 │   ├── ConsoleUI.hpp
+│   ├── LogManager.hpp
+│   ├── PersistenceResult.hpp
+│   ├── SaveManager.hpp
 │   ├── ChickenActivity.hpp
 │   ├── Course.hpp
 │   ├── PartTimeJobActivity.hpp
@@ -66,6 +81,8 @@ Campus-Life/
 ├── src/
 │   ├── CampusLifeGame.cpp
 │   ├── ConsoleUI.cpp
+│   ├── LogManager.cpp
+│   ├── SaveManager.cpp
 │   ├── ChickenActivity.cpp
 │   ├── Course.cpp
 │   ├── PartTimeJobActivity.cpp
@@ -78,6 +95,7 @@ Campus-Life/
     ├── ActivityInheritanceTests.cpp
     ├── ConsoleUITests.cpp
     ├── OperatorOverloadingTests.cpp
+    ├── PersistenceTests.cpp
     ├── PolymorphismTests.cpp
     └── StudentOwnershipTests.cpp
 ```
@@ -114,7 +132,8 @@ out/cmake-build/CampusLife
 메인 메뉴에서 `1`을 입력해 새 게임을 시작합니다. 각 요일에 `1` 공부, `2` 아르바이트,
 `3` 잠자기, `4` 치킨 먹기를 선택하고, 공부에는 과목 번호를 추가로 입력합니다.
 계획을 확인할 때 `Y`를 입력하면 실행하고 `N`을 입력하면 월요일부터 다시 선택합니다.
-계획 입력 중 `0`을 입력하면 메인 메뉴로 돌아갑니다. 메뉴와 결과 문구는 영어로 출력됩니다.
+계획 입력 중 `5`를 입력하면 현재 상태를 저장하고, `0`을 입력하면 메인 메뉴로 돌아갑니다.
+메인 메뉴에서 `2`를 입력하면 마지막 저장 상태를 불러옵니다. 메뉴와 결과 문구는 영어로 출력됩니다.
 
 ## 테스트
 
@@ -141,6 +160,7 @@ GoogleTest 실행 파일을 직접 실행할 수도 있습니다.
 .\out\cmake-build\Debug\ActivityInheritanceTests.exe
 .\out\cmake-build\Debug\PolymorphismTests.exe
 .\out\cmake-build\Debug\ConsoleUITests.exe
+.\out\cmake-build\Debug\PersistenceTests.exe
 ```
 
 기존 테스트와 콘솔 UI 테스트는 다음 동작을 검증합니다.
@@ -157,6 +177,8 @@ GoogleTest 실행 파일을 직접 실행할 수도 있습니다.
 10. 주말 회복 상한, Burnout 예약·해제·재예약과 정수 나눗셈에 의한 학습량
 11. 모든 과목이 A+가 되어도 남은 요일과 주말 처리를 끝까지 수행
 12. 잘못된 입력·EOF·계획 재입력, 일별 출력과 16주 종료·장학금 화면
+13. 저장 기록 누적과 마지막 상태 복원, Burnout 유지, 손상 파일 거부 및 실패 시 상태 보존
+14. 주간 로그 추기, 파일 접근 오류와 콘솔 저장·불러오기 흐름
 
 ## 브랜치
 
@@ -168,6 +190,7 @@ GoogleTest 실행 파일을 직접 실행할 수도 있습니다.
 | `week6` | 5단계 | `Activity` 상속 계층과 네 행동 클래스 |
 | `week09` | 06·07단계 통합 | 추상 클래스, 가상 함수와 다형적 주간 실행 |
 | `week10` | 08단계 | 콘솔 입력 복구와 주간·학기 게임 흐름 |
+| `week11` | 09단계 | 순차 파일 저장·불러오기와 주간 로그 |
 
 ## 라이선스
 

@@ -5,12 +5,18 @@
 
 #include "CampusLifeGame.hpp"
 #include "ConsoleUI.hpp"
+#include "TemporaryDirectory.hpp"
 
-TEST(ConsoleUITest, InvalidMenuValuesAndTrailingCharactersAreRetried) {
+class ConsoleUITest : public ::testing::Test {
+protected:
+    TemporaryDirectory temporary;
+};
+
+TEST_F(ConsoleUITest, InvalidMenuValuesAndTrailingCharactersAreRetried) {
     std::istringstream input{ "abc\n2x\n99999999999999999999\n9\n3\n3\n3\n3\n3\ny\n" };
     std::ostringstream output;
     CampusLifeGame game{ Student{} };
-    ConsoleUI ui{ input, output };
+    ConsoleUI ui{ input, output, temporary.path() };
 
     ui.play(game);
 
@@ -19,11 +25,11 @@ TEST(ConsoleUITest, InvalidMenuValuesAndTrailingCharactersAreRetried) {
     EXPECT_NE(output.str().find("WEEK 1 RESULT"), std::string::npos);
 }
 
-TEST(ConsoleUITest, RejectedPlanIsReenteredBeforeAnyActionRuns) {
+TEST_F(ConsoleUITest, RejectedPlanIsReenteredBeforeAnyActionRuns) {
     std::istringstream input{ "3\n3\n3\n3\n3\nn\n1\n2\n3\n3\n3\n3\ny\n" };
     std::ostringstream output;
     CampusLifeGame game{ Student{} };
-    ConsoleUI ui{ input, output };
+    ConsoleUI ui{ input, output, temporary.path() };
 
     ui.play(game);
 
@@ -33,11 +39,11 @@ TEST(ConsoleUITest, RejectedPlanIsReenteredBeforeAnyActionRuns) {
     EXPECT_NE(output.str().find("Plan not confirmed"), std::string::npos);
 }
 
-TEST(ConsoleUITest, EndOfInputDuringPlanningDoesNotSimulateWeek) {
+TEST_F(ConsoleUITest, EndOfInputDuringPlanningDoesNotSimulateWeek) {
     std::istringstream input{ "1\n1\n3\n" };
     std::ostringstream output;
     CampusLifeGame game{ Student{} };
-    ConsoleUI ui{ input, output };
+    ConsoleUI ui{ input, output, temporary.path() };
 
     ui.play(game);
 
@@ -47,11 +53,11 @@ TEST(ConsoleUITest, EndOfInputDuringPlanningDoesNotSimulateWeek) {
     EXPECT_EQ(game.getPlan()[0].activity, nullptr);
 }
 
-TEST(ConsoleUITest, RejectedPlanIsDiscardedEvenIfInputEndsImmediately) {
+TEST_F(ConsoleUITest, RejectedPlanIsDiscardedEvenIfInputEndsImmediately) {
     std::istringstream input{ "3\n3\n3\n3\n3\nn\n" };
     std::ostringstream output;
     CampusLifeGame game{ Student{} };
-    ConsoleUI ui{ input, output };
+    ConsoleUI ui{ input, output, temporary.path() };
 
     ui.play(game);
 
@@ -61,11 +67,11 @@ TEST(ConsoleUITest, RejectedPlanIsDiscardedEvenIfInputEndsImmediately) {
     }
 }
 
-TEST(ConsoleUITest, ConfirmationRejectsExtraCharactersAndAcceptsUppercase) {
+TEST_F(ConsoleUITest, ConfirmationRejectsExtraCharactersAndAcceptsUppercase) {
     std::istringstream input{ "3\n3\n3\n3\n3\nY extra\nY\n" };
     std::ostringstream output;
     CampusLifeGame game{ Student{} };
-    ConsoleUI ui{ input, output };
+    ConsoleUI ui{ input, output, temporary.path() };
 
     ui.play(game);
 
@@ -73,11 +79,11 @@ TEST(ConsoleUITest, ConfirmationRejectsExtraCharactersAndAcceptsUppercase) {
     EXPECT_NE(output.str().find("Invalid input. Enter Y or N"), std::string::npos);
 }
 
-TEST(ConsoleUITest, DailyStudyResultsShowEachDaysOwnProgress) {
+TEST_F(ConsoleUITest, DailyStudyResultsShowEachDaysOwnProgress) {
     std::istringstream input{ "1\n1\n1\n1\n3\n3\n3\ny\n" };
     std::ostringstream output;
     CampusLifeGame game{ Student{} };
-    ConsoleUI ui{ input, output };
+    ConsoleUI ui{ input, output, temporary.path() };
 
     ui.play(game);
 
@@ -86,11 +92,11 @@ TEST(ConsoleUITest, DailyStudyResultsShowEachDaysOwnProgress) {
     EXPECT_NE(output.str().find("Weekend Energy: 80 -> 100"), std::string::npos);
 }
 
-TEST(ConsoleUITest, FailedActionsShowRequiredAndAvailableResources) {
+TEST_F(ConsoleUITest, FailedActionsShowRequiredAndAvailableResources) {
     std::istringstream input{ "1\n1\n2\n4\n3\n3\ny\n" };
     std::ostringstream output;
     CampusLifeGame game{ Student{ "Ara", 10000, 0 } };
-    ConsoleUI ui{ input, output };
+    ConsoleUI ui{ input, output, temporary.path() };
 
     ui.play(game);
 
@@ -102,11 +108,11 @@ TEST(ConsoleUITest, FailedActionsShowRequiredAndAvailableResources) {
     EXPECT_FALSE(game.getNextBurnout());
 }
 
-TEST(ConsoleUITest, NextWeekShowsBurnoutBeforePlanning) {
+TEST_F(ConsoleUITest, NextWeekShowsBurnoutBeforePlanning) {
     std::istringstream input{ "1\n1\n3\n3\n3\n3\ny\n" };
     std::ostringstream output;
     CampusLifeGame game{ Student{ "Ara", 50000, 25 } };
-    ConsoleUI ui{ input, output };
+    ConsoleUI ui{ input, output, temporary.path() };
 
     ui.play(game);
 
@@ -116,7 +122,7 @@ TEST(ConsoleUITest, NextWeekShowsBurnoutBeforePlanning) {
     EXPECT_NE(output.str().find("Next week burnout"), std::string::npos);
 }
 
-TEST(ConsoleUITest, SemesterEndsAfterSixteenCompleteWeeks) {
+TEST_F(ConsoleUITest, SemesterEndsAfterSixteenCompleteWeeks) {
     std::string choices;
     for (int week = 0; week < 16; ++week) {
         choices += "3\n3\n3\n3\n3\ny\n";
@@ -124,7 +130,7 @@ TEST(ConsoleUITest, SemesterEndsAfterSixteenCompleteWeeks) {
     std::istringstream input{ choices };
     std::ostringstream output;
     CampusLifeGame game{ Student{} };
-    ConsoleUI ui{ input, output };
+    ConsoleUI ui{ input, output, temporary.path() };
 
     ui.play(game);
 
@@ -134,7 +140,7 @@ TEST(ConsoleUITest, SemesterEndsAfterSixteenCompleteWeeks) {
     EXPECT_EQ(output.str().find("WEEK 17 PLAN"), std::string::npos);
 }
 
-TEST(ConsoleUITest, ScholarshipAppearsAfterAllFiveDaysAndWeekend) {
+TEST_F(ConsoleUITest, ScholarshipAppearsAfterAllFiveDaysAndWeekend) {
     Student student;
     for (int course = 0; course < student.getCourseCount(); ++course) {
         student.getCourse(course) += 100;
@@ -145,7 +151,7 @@ TEST(ConsoleUITest, ScholarshipAppearsAfterAllFiveDaysAndWeekend) {
     CampusLifeGame game{ student };
     std::istringstream input{ "1\n1\n2\n3\n4\n2\ny\n" };
     std::ostringstream output;
-    ConsoleUI ui{ input, output };
+    ConsoleUI ui{ input, output, temporary.path() };
 
     ui.play(game);
 
@@ -156,10 +162,10 @@ TEST(ConsoleUITest, ScholarshipAppearsAfterAllFiveDaysAndWeekend) {
     EXPECT_NE(output.str().find("SCHOLARSHIP"), std::string::npos);
 }
 
-TEST(ConsoleUITest, MainMenuCanExitWithoutStartingGame) {
+TEST_F(ConsoleUITest, MainMenuCanExitWithoutStartingGame) {
     std::istringstream input{ "0\n" };
     std::ostringstream output;
-    ConsoleUI ui{ input, output };
+    ConsoleUI ui{ input, output, temporary.path() };
 
     ui.run();
 

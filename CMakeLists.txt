@@ -8,6 +8,7 @@ add_executable(CampusLife
     include/Activity.hpp
     include/CampusLifeGame.hpp
     include/ConsoleUI.hpp
+    include/LogManager.hpp
     include/PersistenceResult.hpp
     include/SaveManager.hpp
     include/ChickenActivity.hpp
@@ -20,6 +21,7 @@ add_executable(CampusLife
     src/main.cpp
     src/CampusLifeGame.cpp
     src/ConsoleUI.cpp
+    src/LogManager.cpp
     src/SaveManager.cpp
     src/ChickenActivity.cpp
     src/Course.cpp
@@ -47,6 +49,7 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES
     src/main.cpp
     src/CampusLifeGame.cpp
     src/ConsoleUI.cpp
+    src/LogManager.cpp
     src/SaveManager.cpp
     src/ChickenActivity.cpp
     src/Course.cpp
@@ -58,6 +61,7 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES
     include/Activity.hpp
     include/CampusLifeGame.hpp
     include/ConsoleUI.hpp
+    include/LogManager.hpp
     include/PersistenceResult.hpp
     include/SaveManager.hpp
     include/ChickenActivity.hpp
@@ -177,6 +181,7 @@ if(BUILD_TESTING)
         tests/ConsoleUITests.cpp
         src/CampusLifeGame.cpp
         src/ConsoleUI.cpp
+        src/LogManager.cpp
         src/SaveManager.cpp
         src/ChickenActivity.cpp
         src/Course.cpp
@@ -196,4 +201,27 @@ if(BUILD_TESTING)
     endif()
     gtest_add_tests(TARGET ConsoleUITests)
 
+    add_executable(PersistenceTests
+        tests/PersistenceTests.cpp
+        src/CampusLifeGame.cpp
+        src/ConsoleUI.cpp
+        src/LogManager.cpp
+        src/SaveManager.cpp
+        src/ChickenActivity.cpp
+        src/Course.cpp
+        src/PartTimeJobActivity.cpp
+        src/SleepActivity.cpp
+        src/Student.cpp
+        src/StudyActivity.cpp
+        src/WeeklyPlan.cpp
+    )
+    target_include_directories(PersistenceTests PRIVATE include)
+    target_compile_features(PersistenceTests PRIVATE cxx_std_20)
+    target_link_libraries(PersistenceTests PRIVATE GTest::gtest_main)
+    if(MSVC)
+        target_compile_options(PersistenceTests PRIVATE /W4 /permissive- /EHsc)
+    else()
+        target_compile_options(PersistenceTests PRIVATE -Wall -Wextra -Wpedantic)
+    endif()
+    gtest_add_tests(TARGET PersistenceTests)
 endif()
