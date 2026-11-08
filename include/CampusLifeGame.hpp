@@ -89,6 +89,19 @@ public:
     bool getNextBurnout() const;
 
     /**
+     * @brief Replaces the game state after a save record has been validated.
+     *
+     * A successful restore clears the plan's non-owning pointers.
+     * @param savedStudent Student state to copy; exactly three courses are required.
+     * @param savedWeek Next week to play, in 1..16.
+     * @param savedCurrentBurnout Burnout applied in the last simulated week.
+     * @param savedNextBurnout Burnout reserved for the next week.
+     * @return True on success; false leaves the game and plan unchanged.
+     */
+    bool restoreState(const Student& savedStudent, int savedWeek,
+                      bool savedCurrentBurnout, bool savedNextBurnout);
+
+    /**
      * @brief Selects study without changing the student.
      *
      * @param day Zero-based weekday index in 0..4.

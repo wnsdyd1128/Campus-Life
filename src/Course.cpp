@@ -29,6 +29,16 @@ std::string Course::getName() const { return name; }
 std::string Course::getGrade() const { return grade; }
 int Course::getProgress() const { return progress; }
 
+bool Course::restoreState(const std::string& savedGrade, int savedProgress) {
+    if ((savedGrade != "C" && savedGrade != "B" && savedGrade != "A" && savedGrade != "A+") ||
+        savedProgress < 0 || savedProgress >= 100 || (savedGrade == "A+" && savedProgress != 0)) {
+        return false;
+    }
+    grade = savedGrade;
+    progress = savedProgress;
+    return true;
+}
+
 Course& Course::operator+=(int point) {
     if (point <= 0 || grade == "A+") {
         return *this;

@@ -22,6 +22,8 @@
     <ClInclude Include="include\Activity.hpp" />
     <ClInclude Include="include\CampusLifeGame.hpp" />
     <ClInclude Include="include\ConsoleUI.hpp" />
+    <ClInclude Include="include\PersistenceResult.hpp" />
+    <ClInclude Include="include\SaveManager.hpp" />
     <ClInclude Include="include\ChickenActivity.hpp" />
     <ClInclude Include="include\Course.hpp" />
     <ClInclude Include="include\PartTimeJobActivity.hpp" />
@@ -33,6 +35,7 @@
   <ItemGroup>
     <ClCompile Include="src\CampusLifeGame.cpp" />
     <ClCompile Include="src\ConsoleUI.cpp" />
+    <ClCompile Include="src\SaveManager.cpp" />
     <ClCompile Include="src\ChickenActivity.cpp" />
     <ClCompile Include="src\Course.cpp" />
     <ClCompile Include="src\main.cpp" />

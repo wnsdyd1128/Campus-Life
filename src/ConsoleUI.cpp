@@ -5,9 +5,11 @@
 #include <ostream>
 #include <sstream>
 #include <string>
+#include <utility>
 
 #include "Activity.hpp"
 #include "CampusLifeGame.hpp"
+#include "SaveManager.hpp"
 
 namespace {
 constexpr int SEMESTER_WEEKS{ 16 };
@@ -31,8 +33,9 @@ void printStudent(std::ostream& output, const Student& student) {
 }
 }
 
-ConsoleUI::ConsoleUI(std::istream& input, std::ostream& output)
-    : input{ input }, output{ output } {
+ConsoleUI::ConsoleUI(std::istream& input, std::ostream& output,
+                     std::filesystem::path dataDirectory)
+    : input{ input }, output{ output }, dataDirectory{ std::move(dataDirectory) } {
 }
 
 bool ConsoleUI::readInt(const std::string& prompt, int min, int max, int& value) {
@@ -74,10 +77,20 @@ bool ConsoleUI::readConfirmation(bool& confirmed) {
 
 void ConsoleUI::run() {
     while (true) {
-        output << "\n===== CAMPUS LIFE =====\n1. New game\n0. Exit\n";
+        output << "\n===== CAMPUS LIFE =====\n1. New game\n2. Load game\n0. Exit\n";
         int selection{};
-        if (!readInt("Select >> ", 0, 1, selection) || selection == 0) return;
+        if (!readInt("Select >> ", 0, 2, selection) || selection == 0) return;
         CampusLifeGame game{ Student{ "Biryong", 50000, 100 } };
+        if (selection == 2) {
+            const PersistenceResult result{ SaveManager{ dataDirectory / "save.txt" }.load(game) };
+            if (result != PersistenceResult::Ok) {
+                if (result == PersistenceResult::NotFound) output << "No saved game.\n";
+                else if (result == PersistenceResult::InvalidData) output << "Load failed: invalid save data.\n";
+                else output << "Load failed: file error.\n";
+                continue;
+            }
+            output << "Game loaded.\n";
+        }
         play(game);
     }
 }
@@ -93,9 +106,18 @@ void ConsoleUI::play(CampusLifeGame& game) {
         bool confirmed{ false };
         while (!confirmed) {
             for (int day = 0; day < WeeklyPlan::DAY_COUNT; ++day) {
-                output << "\n[" << DAY_NAMES[day] << " plan]\n"
-                       << "1. Study\n2. Part-time job\n3. Sleep\n4. Eat chicken\n0. Main menu\n";
-                if (!readInt("Select >> ", 0, 4, choices[day]) || choices[day] == 0) return;
+                do {
+                    output << "\n[" << DAY_NAMES[day] << " plan]\n"
+                           << "1. Study\n2. Part-time job\n3. Sleep\n4. Eat chicken\n"
+                           << "5. Save game\n0. Main menu\n";
+                    if (!readInt("Select >> ", 0, 5, choices[day]) || choices[day] == 0) return;
+                    if (choices[day] == 5) {
+                        const PersistenceResult saved{ SaveManager{ dataDirectory / "save.txt" }.save(game) };
+                        if (saved == PersistenceResult::Ok) output << "Game saved.\n";
+                        else if (saved == PersistenceResult::InvalidData) output << "Save failed: invalid save data.\n";
+                        else output << "Save failed: file error.\n";
+                    }
+                } while (choices[day] == 5);
                 if (choices[day] == 1) {
                     const Student& student{ game.getStudent() };
                     output << "Choose a course:\n";

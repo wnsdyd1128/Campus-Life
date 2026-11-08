@@ -22,6 +22,14 @@ public:
     int getProgress() const;
 
     /**
+     * @brief Restores a grade and progress only when both satisfy course rules.
+     * @param savedGrade Grade C, B, A, or A+.
+     * @param savedProgress Progress in 0..99; A+ requires zero.
+     * @return True on success; false leaves the course unchanged.
+     */
+    bool restoreState(const std::string& savedGrade, int savedProgress);
+
+    /**
      * @brief Applies study points while preserving the course grade invariant.
      *
      * Reaching 100 points advances one grade and resets progress to zero.

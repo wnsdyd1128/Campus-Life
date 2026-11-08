@@ -363,6 +363,7 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # Custom gitignore files
+/data/
 tmp/
 docs/
 .devcontainer/

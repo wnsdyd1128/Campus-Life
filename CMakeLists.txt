@@ -8,6 +8,8 @@ add_executable(CampusLife
     include/Activity.hpp
     include/CampusLifeGame.hpp
     include/ConsoleUI.hpp
+    include/PersistenceResult.hpp
+    include/SaveManager.hpp
     include/ChickenActivity.hpp
     include/Course.hpp
     include/PartTimeJobActivity.hpp
@@ -18,6 +20,7 @@ add_executable(CampusLife
     src/main.cpp
     src/CampusLifeGame.cpp
     src/ConsoleUI.cpp
+    src/SaveManager.cpp
     src/ChickenActivity.cpp
     src/Course.cpp
     src/PartTimeJobActivity.cpp
@@ -44,6 +47,7 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES
     src/main.cpp
     src/CampusLifeGame.cpp
     src/ConsoleUI.cpp
+    src/SaveManager.cpp
     src/ChickenActivity.cpp
     src/Course.cpp
     src/PartTimeJobActivity.cpp
@@ -54,6 +58,8 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES
     include/Activity.hpp
     include/CampusLifeGame.hpp
     include/ConsoleUI.hpp
+    include/PersistenceResult.hpp
+    include/SaveManager.hpp
     include/ChickenActivity.hpp
     include/Course.hpp
     include/PartTimeJobActivity.hpp
@@ -171,6 +177,7 @@ if(BUILD_TESTING)
         tests/ConsoleUITests.cpp
         src/CampusLifeGame.cpp
         src/ConsoleUI.cpp
+        src/SaveManager.cpp
         src/ChickenActivity.cpp
         src/Course.cpp
         src/PartTimeJobActivity.cpp
@@ -188,4 +195,5 @@ if(BUILD_TESTING)
         target_compile_options(ConsoleUITests PRIVATE -Wall -Wextra -Wpedantic)
     endif()
     gtest_add_tests(TARGET ConsoleUITests)
+
 endif()

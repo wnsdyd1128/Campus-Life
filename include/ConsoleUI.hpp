@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <iosfwd>
 #include <string>
 
@@ -13,8 +14,10 @@ public:
      *
      * @param input Input stream; must outlive this UI.
      * @param output Output stream; must outlive this UI.
+     * @param dataDirectory Directory for the sequential save and weekly log.
      */
-    ConsoleUI(std::istream& input, std::ostream& output);
+    ConsoleUI(std::istream& input, std::ostream& output,
+              std::filesystem::path dataDirectory = "data");
 
     /** @brief Shows the main menu until exit or end of input. */
     void run();
@@ -32,4 +35,5 @@ private:
     bool readConfirmation(bool& confirmed);
     std::istream& input;
     std::ostream& output;
+    std::filesystem::path dataDirectory;
 };

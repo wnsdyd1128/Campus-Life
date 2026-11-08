@@ -10,6 +10,20 @@ int CampusLifeGame::getWeek() const { return week; }
 bool CampusLifeGame::getCurrentBurnout() const { return currentBurnout; }
 bool CampusLifeGame::getNextBurnout() const { return nextBurnout; }
 
+bool CampusLifeGame::restoreState(const Student& savedStudent, int savedWeek,
+                                  bool savedCurrentBurnout, bool savedNextBurnout) {
+    if (savedWeek < 1 || savedWeek > 16 || savedStudent.getCourseCount() != 3 ||
+        savedStudent.getMoney() < 0 || savedStudent.getEnergy() < 0 || savedStudent.getEnergy() > 100) {
+        return false;
+    }
+    student = savedStudent;
+    week = savedWeek;
+    currentBurnout = savedCurrentBurnout;
+    nextBurnout = savedNextBurnout;
+    plan.clear();
+    return true;
+}
+
 void CampusLifeGame::planStudy(int day, int courseIndex) {
     plan[day] = { &study, courseIndex };
 }
