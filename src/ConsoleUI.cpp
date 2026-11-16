@@ -76,6 +76,26 @@ bool ConsoleUI::readConfirmation(bool& confirmed) {
     }
 }
 
+bool ConsoleUI::chooseSlot(const char* action, int& slot) {
+    output << "\n===== " << action << " GAME =====\n";
+    SaveManager saves{ dataDirectory / "save.dat" };
+    for (int i = 1; i <= SaveManager::SLOT_COUNT; ++i) {
+        CampusLifeGame preview{ Student{} };
+        const PersistenceResult result{ saves.load(i, preview) };
+        output << i << ". ";
+        if (result == PersistenceResult::Ok) {
+            output << "[Week " << preview.getWeek() << "] Energy "
+                   << preview.getStudent().getEnergy() << " / Money "
+                   << preview.getStudent().getMoney();
+        } else if (result == PersistenceResult::NotFound) output << "EMPTY";
+        else if (result == PersistenceResult::InvalidData) output << "INVALID DATA";
+        else output << "FILE ERROR";
+        output << '\n';
+    }
+    output << "0. Back\n";
+    return readInt("Slot >> ", 0, SaveManager::SLOT_COUNT, slot) && slot != 0;
+}
+
 void ConsoleUI::run() {
     while (true) {
         output << "\n===== CAMPUS LIFE =====\n1. New game\n2. Load game\n0. Exit\n";
@@ -83,7 +103,9 @@ void ConsoleUI::run() {
         if (!readInt("Select >> ", 0, 2, selection) || selection == 0) return;
         CampusLifeGame game{ Student{ "Biryong", 50000, 100 } };
         if (selection == 2) {
-            const PersistenceResult result{ SaveManager{ dataDirectory / "save.txt" }.load(game) };
+            int slot{};
+            if (!chooseSlot("LOAD", slot)) continue;
+            const PersistenceResult result{ SaveManager{ dataDirectory / "save.dat" }.load(slot, game) };
             if (result != PersistenceResult::Ok) {
                 if (result == PersistenceResult::NotFound) output << "No saved game.\n";
                 else if (result == PersistenceResult::InvalidData) output << "Load failed: invalid save data.\n";
@@ -113,7 +135,9 @@ void ConsoleUI::play(CampusLifeGame& game) {
                            << "5. Save game\n0. Main menu\n";
                     if (!readInt("Select >> ", 0, 5, choices[day]) || choices[day] == 0) return;
                     if (choices[day] == 5) {
-                        const PersistenceResult saved{ SaveManager{ dataDirectory / "save.txt" }.save(game) };
+                        int slot{};
+                        if (!chooseSlot("SAVE", slot)) continue;
+                        const PersistenceResult saved{ SaveManager{ dataDirectory / "save.dat" }.save(slot, game) };
                         if (saved == PersistenceResult::Ok) output << "Game saved.\n";
                         else if (saved == PersistenceResult::InvalidData) output << "Save failed: invalid save data.\n";
                         else output << "Save failed: file error.\n";

@@ -14,7 +14,7 @@ public:
      *
      * @param input Input stream; must outlive this UI.
      * @param output Output stream; must outlive this UI.
-     * @param dataDirectory Directory for the sequential save and weekly log.
+     * @param dataDirectory Directory for the slot file and weekly log.
      */
     ConsoleUI(std::istream& input, std::ostream& output,
               std::filesystem::path dataDirectory = "data");
@@ -33,6 +33,7 @@ public:
 private:
     bool readInt(const std::string& prompt, int min, int max, int& value);
     bool readConfirmation(bool& confirmed);
+    bool chooseSlot(const char* action, int& slot);
     std::istream& input;
     std::ostream& output;
     std::filesystem::path dataDirectory;
