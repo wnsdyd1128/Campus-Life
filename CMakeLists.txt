@@ -10,6 +10,7 @@ add_executable(CampusLife
     include/ConsoleUI.hpp
     include/LogManager.hpp
     include/PersistenceResult.hpp
+    include/GameException.hpp
     include/SaveManager.hpp
     include/ChickenActivity.hpp
     include/Course.hpp
@@ -63,6 +64,7 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES
     include/ConsoleUI.hpp
     include/LogManager.hpp
     include/PersistenceResult.hpp
+    include/GameException.hpp
     include/SaveManager.hpp
     include/ChickenActivity.hpp
     include/Course.hpp

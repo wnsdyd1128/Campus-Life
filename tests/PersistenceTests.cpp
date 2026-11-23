@@ -24,9 +24,9 @@ TEST_F(PersistenceTest, ThreeSlotsAreIndependentWhenOneIsOverwritten) {
     CampusLifeGame first{ Student{ "First", 1000, 50 } };
     CampusLifeGame second{ Student{ "Second", 2000, 60 } };
     CampusLifeGame third{ Student{ "Third", 3000, 70 } };
-    ASSERT_EQ(saves.save(1, first), PersistenceResult::Ok);
-    ASSERT_EQ(saves.save(2, second), PersistenceResult::Ok);
-    ASSERT_EQ(saves.save(3, third), PersistenceResult::Ok);
+    ASSERT_NO_THROW(saves.save(1, first));
+    ASSERT_NO_THROW(saves.save(2, second));
+    ASSERT_NO_THROW(saves.save(3, third));
     const auto size{ std::filesystem::file_size(path) };
     ASSERT_EQ(size % 3, 0);
     std::ifstream beforeFile{ path, std::ios::binary };
@@ -34,19 +34,19 @@ TEST_F(PersistenceTest, ThreeSlotsAreIndependentWhenOneIsOverwritten) {
 
     second.planSleep(0);
     second.simulateWeek();
-    ASSERT_EQ(saves.save(2, second), PersistenceResult::Ok);
+    ASSERT_NO_THROW(saves.save(2, second));
     EXPECT_EQ(std::filesystem::file_size(path), size);
     std::ifstream afterFile{ path, std::ios::binary };
     const std::string after{ std::istreambuf_iterator<char>{afterFile}, {} };
     EXPECT_EQ(before.substr(0, size / 3), after.substr(0, size / 3));
     EXPECT_EQ(before.substr(2 * size / 3), after.substr(2 * size / 3));
     CampusLifeGame restored{ Student{} };
-    ASSERT_EQ(saves.load(1, restored), PersistenceResult::Ok);
+    ASSERT_TRUE(saves.load(1, restored));
     EXPECT_EQ(restored.getStudent().getName(), "First");
-    ASSERT_EQ(saves.load(2, restored), PersistenceResult::Ok);
+    ASSERT_TRUE(saves.load(2, restored));
     EXPECT_EQ(restored.getStudent().getName(), "Second");
     EXPECT_EQ(restored.getWeek(), 2);
-    ASSERT_EQ(saves.load(3, restored), PersistenceResult::Ok);
+    ASSERT_TRUE(saves.load(3, restored));
     EXPECT_EQ(restored.getStudent().getName(), "Third");
 }
 
@@ -62,10 +62,10 @@ TEST_F(PersistenceTest, SaveRestoresCoursesBurnoutAndClearsOldPlan) {
     original.planStudy(0, 0);
     original.simulateWeek();
     SaveManager saves{ temporary.path() / "save.dat" };
-    ASSERT_EQ(saves.save(3, original), PersistenceResult::Ok);
+    ASSERT_NO_THROW(saves.save(3, original));
     CampusLifeGame restored{ Student{ "Different", 1, 1 } };
     restored.planWork(2);
-    ASSERT_EQ(saves.load(3, restored), PersistenceResult::Ok);
+    ASSERT_TRUE(saves.load(3, restored));
     EXPECT_EQ(restored.getWeek(), 2);
     EXPECT_TRUE(restored.getNextBurnout());
     EXPECT_EQ(restored.getStudent().getName(), "Ara Kim");
@@ -87,11 +87,11 @@ TEST_F(PersistenceTest, MissingEmptyAndInvalidSlotsDoNotChangeGame) {
     CampusLifeGame game{ Student{ "Keep", 1234, 44 } };
     game.planWork(0);
     const Activity* oldAction{ game.getPlan()[0].activity };
-    EXPECT_EQ(saves.load(1, game), PersistenceResult::NotFound);
-    EXPECT_EQ(saves.save(0, game), PersistenceResult::InvalidData);
-    EXPECT_EQ(saves.load(4, game), PersistenceResult::InvalidData);
-    ASSERT_EQ(saves.save(1, game), PersistenceResult::Ok);
-    EXPECT_EQ(saves.load(2, game), PersistenceResult::NotFound);
+    EXPECT_FALSE(saves.load(1, game));
+    EXPECT_THROW(saves.save(0, game), InvalidSaveSlotException);
+    EXPECT_THROW(saves.load(4, game), InvalidSaveSlotException);
+    ASSERT_NO_THROW(saves.save(1, game));
+    EXPECT_FALSE(saves.load(2, game));
     EXPECT_EQ(game.getStudent().getName(), "Keep");
     EXPECT_EQ(game.getPlan()[0].activity, oldAction);
 }
@@ -100,11 +100,11 @@ TEST_F(PersistenceTest, TruncatedFileIsRejectedAndNotOverwritten) {
     const auto path{ temporary.path() / "save.dat" };
     SaveManager saves{ path };
     CampusLifeGame game{ Student{ "Keep", 1234, 44 } };
-    ASSERT_EQ(saves.save(1, game), PersistenceResult::Ok);
+    ASSERT_NO_THROW(saves.save(1, game));
     std::filesystem::resize_file(path, std::filesystem::file_size(path) - 1);
     const auto size{ std::filesystem::file_size(path) };
-    EXPECT_EQ(saves.load(1, game), PersistenceResult::InvalidData);
-    EXPECT_EQ(saves.save(2, game), PersistenceResult::InvalidData);
+    EXPECT_THROW(saves.load(1, game), CorruptedSaveDataException);
+    EXPECT_THROW(saves.save(2, game), CorruptedSaveDataException);
     EXPECT_EQ(std::filesystem::file_size(path), size);
     EXPECT_EQ(game.getStudent().getName(), "Keep");
 }
@@ -114,19 +114,19 @@ TEST_F(PersistenceTest, CorruptSlotDoesNotPreventReadingOtherSlots) {
     SaveManager saves{ path };
     CampusLifeGame first{ Student{ "First", 1000, 50 } };
     CampusLifeGame third{ Student{ "Third", 3000, 70 } };
-    ASSERT_EQ(saves.save(1, first), PersistenceResult::Ok);
-    ASSERT_EQ(saves.save(3, third), PersistenceResult::Ok);
+    ASSERT_NO_THROW(saves.save(1, first));
+    ASSERT_NO_THROW(saves.save(3, third));
     const auto slotSize{ std::filesystem::file_size(path) / 3 };
     { std::fstream file{ path, std::ios::in | std::ios::out | std::ios::binary };
       file.seekp(static_cast<std::streamoff>(slotSize));
       const std::string corrupt(static_cast<std::size_t>(slotSize), '\xff');
       file.write(corrupt.data(), static_cast<std::streamsize>(corrupt.size())); }
     CampusLifeGame target{ Student{ "Keep", 1234, 44 } };
-    EXPECT_EQ(saves.load(2, target), PersistenceResult::InvalidData);
+    EXPECT_THROW(saves.load(2, target), CorruptedSaveDataException);
     EXPECT_EQ(target.getStudent().getName(), "Keep");
-    ASSERT_EQ(saves.load(1, target), PersistenceResult::Ok);
+    ASSERT_TRUE(saves.load(1, target));
     EXPECT_EQ(target.getStudent().getName(), "First");
-    ASSERT_EQ(saves.load(3, target), PersistenceResult::Ok);
+    ASSERT_TRUE(saves.load(3, target));
     EXPECT_EQ(target.getStudent().getName(), "Third");
 }
 
@@ -141,13 +141,13 @@ TEST_F(PersistenceTest, InvalidRecordFieldsAreRejectedWithoutChangingGame) {
     // The version-1 record uses 32-bit fields followed by fixed-size names.
     const Mutation mutations[]{ {0, 0}, {4, 0}, {8, -1}, {12, 101}, {16, 2}, {120, 4}, {124, 100} };
     for (const Mutation& mutation : mutations) {
-        ASSERT_EQ(saves.save(1, original), PersistenceResult::Ok);
+        ASSERT_NO_THROW(saves.save(1, original));
         {
             std::fstream file{ path, std::ios::in | std::ios::out | std::ios::binary };
             file.seekp(mutation.position);
             file.write(reinterpret_cast<const char*>(&mutation.value), sizeof(mutation.value));
         }
-        EXPECT_EQ(saves.load(1, target), PersistenceResult::InvalidData);
+        EXPECT_THROW(saves.load(1, target), CorruptedSaveDataException);
         EXPECT_EQ(target.getStudent().getName(), "Keep");
         EXPECT_EQ(target.getPlan()[0].activity, action);
     }
@@ -169,9 +169,9 @@ TEST_F(PersistenceTest, AllCourseGradesRoundTripThroughBinarySlots) {
         Student student;
         ASSERT_TRUE(student.getCourse(0).restoreState(grade, grade == "A+" ? 0 : 37));
         CampusLifeGame original{ student };
-        ASSERT_EQ(saves.save(1, original), PersistenceResult::Ok);
+        ASSERT_NO_THROW(saves.save(1, original));
         CampusLifeGame restored{ Student{} };
-        ASSERT_EQ(saves.load(1, restored), PersistenceResult::Ok);
+        ASSERT_TRUE(saves.load(1, restored));
         EXPECT_EQ(restored.getStudent().getCourse(0).getGrade(), grade);
         EXPECT_EQ(restored.getStudent().getCourse(0).getProgress(), grade == "A+" ? 0 : 37);
     }
@@ -181,12 +181,12 @@ TEST_F(PersistenceTest, TooLongCourseNameIsRejectedWithoutChangingExistingSlot) 
     const auto path{ temporary.path() / "save.dat" };
     SaveManager saves{ path };
     CampusLifeGame original{ Student{ "Keep", 1234, 44 } };
-    ASSERT_EQ(saves.save(1, original), PersistenceResult::Ok);
+    ASSERT_NO_THROW(saves.save(1, original));
     const std::string names[]{ std::string(32, 'x'), "Data", "Architecture" };
     CampusLifeGame oversized{ Student{ "Other", 50000, 100, names, 3 } };
-    EXPECT_EQ(saves.save(1, oversized), PersistenceResult::InvalidData);
+    EXPECT_THROW(saves.save(1, oversized), GameException);
     CampusLifeGame restored{ Student{} };
-    ASSERT_EQ(saves.load(1, restored), PersistenceResult::Ok);
+    ASSERT_TRUE(saves.load(1, restored));
     EXPECT_EQ(restored.getStudent().getName(), "Keep");
 }
 
@@ -194,10 +194,14 @@ TEST_F(PersistenceTest, FailedSaveOrLogDoesNotChangeStudentState) {
     const auto blocker{ temporary.path() / "not-a-directory" };
     { std::ofstream out{ blocker }; out << "keep"; }
     CampusLifeGame game{ Student{ "Ara", 1234, 44 } };
-    EXPECT_EQ((SaveManager{ blocker / "save.dat" }.save(1, game)), PersistenceResult::IoError);
+    EXPECT_THROW((SaveManager{ blocker / "save.dat" }.save(1, game)), FileOpenException);
     EXPECT_EQ((LogManager{ blocker / "play.log" }.append(1, game)), PersistenceResult::IoError);
     EXPECT_EQ(game.getStudent().getMoney(), 1234);
     EXPECT_EQ(game.getStudent().getEnergy(), 44);
+    std::ifstream existing{ blocker };
+    std::string contents;
+    ASSERT_TRUE(static_cast<bool>(std::getline(existing, contents)));
+    EXPECT_EQ(contents, "keep");
 }
 
 TEST_F(PersistenceTest, WeekLogAppendsWithoutReplacingPreviousEntry) {
@@ -243,6 +247,59 @@ TEST_F(PersistenceTest, ConsoleReportsEmptySlotAndCanCancel) {
     EXPECT_NE(output.str().find("EMPTY"), std::string::npos);
     EXPECT_NE(output.str().find("No saved game"), std::string::npos);
     EXPECT_EQ(output.str().find("===== WEEK 1 ====="), std::string::npos);
+}
+
+TEST_F(PersistenceTest, ConsoleReturnsToMainMenuWhenSaveFileCannotBeOpened) {
+    std::filesystem::create_directory(temporary.path() / "save.dat");
+    std::istringstream input{ "2\n1\n0\n0\n" };
+    std::ostringstream output;
+    ConsoleUI ui{ input, output, temporary.path() };
+
+    ui.run();
+
+    const std::string text{ output.str() };
+    const auto failure{ text.find("Load failed:") };
+    ASSERT_NE(failure, std::string::npos);
+    EXPECT_NE(text.find("save.dat", failure), std::string::npos);
+    EXPECT_NE(text.find("===== WEEK 1 =====", failure), std::string::npos);
+}
+
+TEST_F(PersistenceTest, ConsoleRejectsCorruptSlotAndCanThenLoadAnotherSlot) {
+    const auto path{ temporary.path() / "save.dat" };
+    SaveManager saves{ path };
+    CampusLifeGame saved{ Student{ "Ara", 1234, 44 } };
+    ASSERT_NO_THROW(saves.save(2, saved));
+    {
+        std::fstream file{ path, std::ios::in | std::ios::out | std::ios::binary };
+        file.put('\1');
+        ASSERT_TRUE(file.good());
+    }
+    std::istringstream input{ "2\n1\n2\n2\n0\n0\n" };
+    std::ostringstream output;
+    ConsoleUI ui{ input, output, temporary.path() };
+
+    ui.run();
+
+    const std::string text{ output.str() };
+    EXPECT_NE(text.find("1. INVALID DATA"), std::string::npos);
+    const auto failure{ text.find("Load failed: invalid save data in slot 1") };
+    ASSERT_NE(failure, std::string::npos);
+    EXPECT_NE(text.find("Game loaded.", failure), std::string::npos);
+    EXPECT_NE(text.find("Money: 1234", failure), std::string::npos);
+}
+
+TEST_F(PersistenceTest, ConsoleResumesPlanningWhenSaveFileCannotBeOpened) {
+    std::filesystem::create_directory(temporary.path() / "save.dat");
+    std::istringstream input{ "5\n3\n3\n3\n3\n3\ny\n" };
+    std::ostringstream output;
+    CampusLifeGame game{ Student{} };
+    ConsoleUI ui{ input, output, temporary.path() };
+
+    ui.play(game);
+
+    const std::string text{ output.str() };
+    EXPECT_NE(text.find("Save failed: could not access save file: save.dat"), std::string::npos);
+    EXPECT_EQ(game.getWeek(), 2);
 }
 
 TEST_F(PersistenceTest, ConsoleContinuesAfterWeeklyLogCannotBeWritten) {

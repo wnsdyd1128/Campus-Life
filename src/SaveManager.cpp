@@ -37,6 +37,7 @@ static_assert(std::is_trivially_copyable_v<SaveRecord>);
 static_assert(sizeof(SaveRecord) == 208, "Unexpected binary save record layout");
 
 std::streamoff offset(int slot) {
+    if (slot < 1 || slot > SaveManager::SLOT_COUNT) throw InvalidSaveSlotException{ slot };
     return static_cast<std::streamoff>(slot - 1) * sizeof(SaveRecord);
 }
 
@@ -57,15 +58,20 @@ std::int32_t gradeCode(const std::string& grade) {
     return -1;
 }
 
-PersistenceResult inspectFile(const std::filesystem::path& path) {
+bool hasSaveFile(const std::filesystem::path& path) {
     std::error_code error;
     const bool exists{ std::filesystem::exists(path, error) };
-    if (error) return PersistenceResult::IoError;
-    if (!exists) return PersistenceResult::NotFound;
+    if (error) throw FileOpenException{ path, "could not access save file" };
+    if (!exists) return false;
+    if (!std::filesystem::is_regular_file(path, error)) {
+        throw FileOpenException{ path, "could not access save file" };
+    }
     const auto size{ std::filesystem::file_size(path, error) };
-    if (error) return PersistenceResult::IoError;
-    return size == sizeof(SaveRecord) * SaveManager::SLOT_COUNT
-        ? PersistenceResult::Ok : PersistenceResult::InvalidData;
+    if (error) throw FileOpenException{ path, "could not get save file size" };
+    if (size != sizeof(SaveRecord) * SaveManager::SLOT_COUNT) {
+        throw CorruptedSaveDataException{ "invalid save file size" };
+    }
+    return true;
 }
 
 bool validRecord(const SaveRecord& record) {
@@ -87,12 +93,12 @@ SaveManager::SaveManager(std::filesystem::path path)
     : path{ std::move(path) } {
 }
 
-PersistenceResult SaveManager::save(int slot, const CampusLifeGame& game) const {
-    if (slot < 1 || slot > SLOT_COUNT) return PersistenceResult::InvalidData;
+void SaveManager::save(int slot, const CampusLifeGame& game) const {
+    const std::streamoff position{ offset(slot) };
     const Student& student{ game.getStudent() };
     if (game.getWeek() < 1 || game.getWeek() > 16 || student.getCourseCount() != COURSE_COUNT ||
         student.getMoney() < 0 || student.getEnergy() < 0 || student.getEnergy() > 100) {
-        return PersistenceResult::InvalidData;
+        throw GameException{ "invalid game state for saving" };
     }
     SaveRecord record{};
     record.marker = RECORD_MARKER;
@@ -101,64 +107,72 @@ PersistenceResult SaveManager::save(int slot, const CampusLifeGame& game) const 
     record.energy = student.getEnergy();
     record.currentBurnout = game.getCurrentBurnout();
     record.nextBurnout = game.getNextBurnout();
-    if (!copyName(record.studentName, sizeof(record.studentName), student.getName())) return PersistenceResult::InvalidData;
+    if (!copyName(record.studentName, sizeof(record.studentName), student.getName())) {
+        throw GameException{ "student name does not fit in a save record" };
+    }
     for (int i = 0; i < COURSE_COUNT; ++i) {
         const Course& course{ student.getCourse(i) };
-        if (!copyName(record.courses[i].name, sizeof(record.courses[i].name), course.getName())) return PersistenceResult::InvalidData;
+        if (!copyName(record.courses[i].name, sizeof(record.courses[i].name), course.getName())) {
+            throw GameException{ "course name does not fit in a save record" };
+        }
         record.courses[i].grade = gradeCode(course.getGrade());
         record.courses[i].progress = course.getProgress();
     }
-    if (!validRecord(record)) return PersistenceResult::InvalidData;
+    if (!validRecord(record)) throw GameException{ "invalid game state for saving" };
 
-    const PersistenceResult status{ inspectFile(path) };
-    if (status != PersistenceResult::Ok && status != PersistenceResult::NotFound) return status;
-    if (status == PersistenceResult::NotFound) {
+    if (!hasSaveFile(path)) {
         std::error_code error;
         if (!path.parent_path().empty()) std::filesystem::create_directories(path.parent_path(), error);
-        if (error) return PersistenceResult::IoError;
+        if (error) throw FileOpenException{ path, "could not create save directory" };
         std::ofstream output{ path, std::ios::binary };
-        if (!output) return PersistenceResult::IoError;
+        if (!output) throw FileOpenException{ path, "could not create save file" };
         const SaveRecord empty{};
         for (int i = 0; i < SLOT_COUNT; ++i) {
             output.write(reinterpret_cast<const char*>(&empty), sizeof(empty));
         }
         output.close();
-        if (!output) return PersistenceResult::IoError;
+        if (!output) throw FileOpenException{ path, "could not initialize save file" };
     }
     std::fstream file{ path, std::ios::in | std::ios::out | std::ios::binary };
-    if (!file) return PersistenceResult::IoError;
-    file.seekp(offset(slot), std::ios::beg);
+    if (!file) throw FileOpenException{ path, "could not open save file" };
+    file.seekp(position, std::ios::beg);
     file.write(reinterpret_cast<const char*>(&record), sizeof(record));
     file.close();
-    return file ? PersistenceResult::Ok : PersistenceResult::IoError;
+    if (!file) throw FileOpenException{ path, "could not write save slot" };
 }
 
-PersistenceResult SaveManager::load(int slot, CampusLifeGame& game) const {
-    if (slot < 1 || slot > SLOT_COUNT) return PersistenceResult::InvalidData;
-    const PersistenceResult status{ inspectFile(path) };
-    if (status != PersistenceResult::Ok) return status;
+bool SaveManager::load(int slot, CampusLifeGame& game) const {
+    const std::streamoff position{ offset(slot) };
+    if (!hasSaveFile(path)) return false;
     std::ifstream file{ path, std::ios::binary };
-    if (!file) return PersistenceResult::IoError;
-    file.seekg(offset(slot), std::ios::beg);
+    if (!file) throw FileOpenException{ path, "could not open save file" };
+    if (!file.seekg(position, std::ios::beg)) {
+        throw FileOpenException{ path, "could not seek to save slot" };
+    }
     SaveRecord record{};
+    const auto corrupt = [slot] {
+        return CorruptedSaveDataException{ "invalid save data in slot " + std::to_string(slot) };
+    };
     if (!file.read(reinterpret_cast<char*>(&record), sizeof(record))) {
-        return file.bad() ? PersistenceResult::IoError : PersistenceResult::InvalidData;
+        if (file.bad() || !file.eof()) throw FileOpenException{ path, "could not read save slot" };
+        throw corrupt();
     }
     if (record.marker == 0) {
         const char* bytes{ reinterpret_cast<const char*>(&record) };
-        return std::all_of(bytes, bytes + sizeof(record), [](char value) { return value == 0; })
-            ? PersistenceResult::NotFound : PersistenceResult::InvalidData;
+        if (std::all_of(bytes, bytes + sizeof(record), [](char value) { return value == 0; })) {
+            return false;
+        }
     }
-    if (!validRecord(record)) return PersistenceResult::InvalidData;
+    if (!validRecord(record)) throw corrupt();
     std::array<std::string, COURSE_COUNT> names;
     for (int i = 0; i < COURSE_COUNT; ++i) names[i] = record.courses[i].name;
     Student restored{ record.studentName, record.money, record.energy, names.data(), COURSE_COUNT };
     for (int i = 0; i < COURSE_COUNT; ++i) {
         if (!restored.getCourse(i).restoreState(GRADE_NAMES[record.courses[i].grade],
-                                               record.courses[i].progress)) return PersistenceResult::InvalidData;
+                                               record.courses[i].progress)) throw corrupt();
     }
     if (!game.restoreState(restored, record.week, record.currentBurnout != 0, record.nextBurnout != 0)) {
-        return PersistenceResult::InvalidData;
+        throw corrupt();
     }
-    return PersistenceResult::Ok;
+    return true;
 }

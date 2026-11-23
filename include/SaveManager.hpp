@@ -2,7 +2,7 @@
 
 #include <filesystem>
 
-#include "PersistenceResult.hpp"
+#include "GameException.hpp"
 
 class CampusLifeGame;
 
@@ -23,20 +23,26 @@ public:
      * A failed write may leave the selected slot incomplete.
      * @param slot One-based slot number in 1..3.
      * @param game Game to save at the start of a week.
-     * @return Operation outcome, including validation or file errors.
+     * @throws InvalidSaveSlotException If the slot is outside 1..3.
+     * @throws CorruptedSaveDataException If the existing file has the wrong size.
+     * @throws FileOpenException If the file cannot be accessed or written.
+     * @throws GameException If the game state cannot be represented in the file.
      */
-    PersistenceResult save(int slot, const CampusLifeGame& game) const;
+    void save(int slot, const CampusLifeGame& game) const;
 
     /**
      * @brief Restores the selected record after validating it.
      *
      * The game and its current plan are unchanged on failure. A successful
-     * load clears the plan. A missing file or empty slot returns NotFound.
+     * load clears the plan.
      * @param slot One-based slot number in 1..3.
      * @param game Destination game; ownership remains with the caller.
-     * @return Operation outcome, including a missing or malformed file.
+     * @return True if loaded, false for a missing file or empty slot.
+     * @throws InvalidSaveSlotException If the slot is outside 1..3.
+     * @throws CorruptedSaveDataException If the file or selected record is invalid.
+     * @throws FileOpenException If the file cannot be accessed or read.
      */
-    PersistenceResult load(int slot, CampusLifeGame& game) const;
+    bool load(int slot, CampusLifeGame& game) const;
 
 private:
     std::filesystem::path path;
