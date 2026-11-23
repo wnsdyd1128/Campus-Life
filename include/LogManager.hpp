@@ -2,7 +2,7 @@
 
 #include <filesystem>
 
-#include "PersistenceResult.hpp"
+#include "GameException.hpp"
 
 class CampusLifeGame;
 
@@ -19,9 +19,9 @@ public:
      * @brief Appends the state after the completed week's weekend recovery.
      * @param completedWeek One-based week that was just simulated.
      * @param game Game containing the resulting student and burnout flags.
-     * @return Ok on success, otherwise IoError.
+     * @throws FileOpenException If the log cannot be accessed or written.
      */
-    PersistenceResult append(int completedWeek, const CampusLifeGame& game) const;
+    void append(int completedWeek, const CampusLifeGame& game) const;
 
 private:
     std::filesystem::path path;

@@ -83,7 +83,6 @@ Campus-Life/
 │   ├── CampusLifeGame.hpp
 │   ├── ConsoleUI.hpp
 │   ├── LogManager.hpp
-│   ├── PersistenceResult.hpp
 │   ├── GameException.hpp
 │   ├── SaveManager.hpp
 │   ├── ChickenActivity.hpp

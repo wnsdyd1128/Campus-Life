@@ -195,7 +195,7 @@ TEST_F(PersistenceTest, FailedSaveOrLogDoesNotChangeStudentState) {
     { std::ofstream out{ blocker }; out << "keep"; }
     CampusLifeGame game{ Student{ "Ara", 1234, 44 } };
     EXPECT_THROW((SaveManager{ blocker / "save.dat" }.save(1, game)), FileOpenException);
-    EXPECT_EQ((LogManager{ blocker / "play.log" }.append(1, game)), PersistenceResult::IoError);
+    EXPECT_THROW((LogManager{ blocker / "play.log" }.append(1, game)), FileOpenException);
     EXPECT_EQ(game.getStudent().getMoney(), 1234);
     EXPECT_EQ(game.getStudent().getEnergy(), 44);
     std::ifstream existing{ blocker };
@@ -210,10 +210,10 @@ TEST_F(PersistenceTest, WeekLogAppendsWithoutReplacingPreviousEntry) {
     CampusLifeGame game{ Student{ "Ara", 50000, 25 } };
     game.planStudy(0, 0);
     game.simulateWeek();
-    ASSERT_EQ(logs.append(1, game), PersistenceResult::Ok);
+    ASSERT_NO_THROW(logs.append(1, game));
     game.planSleep(0);
     game.simulateWeek();
-    ASSERT_EQ(logs.append(2, game), PersistenceResult::Ok);
+    ASSERT_NO_THROW(logs.append(2, game));
     std::ifstream in{ path };
     std::string first, second, extra;
     ASSERT_TRUE(static_cast<bool>(std::getline(in, first)));
@@ -312,5 +312,6 @@ TEST_F(PersistenceTest, ConsoleContinuesAfterWeeklyLogCannotBeWritten) {
     ui.play(game);
     EXPECT_EQ(game.getWeek(), 2);
     EXPECT_NE(output.str().find("Warning: could not append weekly log"), std::string::npos);
+    EXPECT_NE(output.str().find("play.log"), std::string::npos);
     EXPECT_NE(output.str().find("WEEK 1 RESULT"), std::string::npos);
 }

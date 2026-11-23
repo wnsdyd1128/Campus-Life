@@ -23,7 +23,6 @@
     <ClInclude Include="include\CampusLifeGame.hpp" />
     <ClInclude Include="include\ConsoleUI.hpp" />
     <ClInclude Include="include\LogManager.hpp" />
-    <ClInclude Include="include\PersistenceResult.hpp" />
     <ClInclude Include="include\GameException.hpp" />
     <ClInclude Include="include\SaveManager.hpp" />
     <ClInclude Include="include\ChickenActivity.hpp" />

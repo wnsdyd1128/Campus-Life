@@ -183,8 +183,10 @@ void ConsoleUI::play(CampusLifeGame& game) {
         }
         const int week{ game.getWeek() };
         const WeekResult result{ game.simulateWeek() };
-        if (LogManager{ dataDirectory / "play.log" }.append(week, game) != PersistenceResult::Ok) {
-            output << "Warning: could not append weekly log.\n";
+        try {
+            LogManager{ dataDirectory / "play.log" }.append(week, game);
+        } catch (const FileOpenException& error) {
+            output << "Warning: could not append weekly log. " << error.what() << '\n';
         }
         const WeeklyPlan& plan{ game.getPlan() };
         for (int day = 0; day < WeeklyPlan::DAY_COUNT; ++day) {

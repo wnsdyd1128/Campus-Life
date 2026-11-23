@@ -11,12 +11,12 @@ LogManager::LogManager(std::filesystem::path path)
     : path{ std::move(path) } {
 }
 
-PersistenceResult LogManager::append(int completedWeek, const CampusLifeGame& game) const {
+void LogManager::append(int completedWeek, const CampusLifeGame& game) const {
     std::error_code error;
     if (!path.parent_path().empty()) std::filesystem::create_directories(path.parent_path(), error);
-    if (error) return PersistenceResult::IoError;
+    if (error) throw FileOpenException{ path, "could not create log directory" };
     std::ofstream output{ path, std::ios::app };
-    if (!output) return PersistenceResult::IoError;
+    if (!output) throw FileOpenException{ path, "could not open log file" };
     const Student& student{ game.getStudent() };
     output << "[Week " << completedWeek << "] Money=" << student.getMoney()
            << " Energy=" << student.getEnergy();
@@ -28,5 +28,5 @@ PersistenceResult LogManager::append(int completedWeek, const CampusLifeGame& ga
     output << " currentBurnout=" << game.getCurrentBurnout()
            << " nextBurnout=" << game.getNextBurnout() << '\n';
     output.close();
-    return output ? PersistenceResult::Ok : PersistenceResult::IoError;
+    if (!output) throw FileOpenException{ path, "could not write log file" };
 }

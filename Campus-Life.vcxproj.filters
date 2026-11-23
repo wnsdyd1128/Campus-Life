@@ -27,9 +27,6 @@
     <ClInclude Include="include\LogManager.hpp">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="include\PersistenceResult.hpp">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="include\GameException.hpp">
       <Filter>헤더 파일</Filter>
     </ClInclude>
